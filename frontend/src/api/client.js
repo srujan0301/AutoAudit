@@ -30,11 +30,20 @@ async function fetchWithAuth(endpoint, token, options = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
+  if (import.meta.env.DEV) {
+  console.log("API:", options.method || "GET", endpoint);
+  }
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  ...options,
+  headers,
+  signal: controller.signal,
+});
+
+clearTimeout(timeout);
 
     // Handle 204 No Content
     if (response.ok && response.status === 204) {
@@ -59,12 +68,24 @@ async function fetchWithAuth(endpoint, token, options = {}) {
     }
 
     const text = await response.text().catch(() => '');
-    return text ? JSON.parse(text) : null;
+    try {
+  return text ? JSON.parse(text) : null;
+} catch {
+  return text;
+}
   } catch (error) {
     if (error instanceof APIError) {
       throw error;
     }
-    throw new APIError('Network or request failure', 0, error);
+if (error.name === 'AbortError') {
+  throw new APIError('Request timeout', 408);
+}
+
+throw new APIError(
+  error?.message || 'Network error occurred',
+  0,
+  error
+);
   }
 }
 
