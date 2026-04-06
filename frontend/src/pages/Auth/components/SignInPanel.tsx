@@ -47,7 +47,7 @@ const socialButtons: SocialButtonConfig[] = [
 export type SignInPanelProps = {
   onLogin?: (email: string, password: string, remember?: boolean) => Promise<void>;
   onSignUpClick?: () => void;
-}
+};
 
 const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
   const auth = useAuth();
@@ -83,7 +83,8 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
         await auth.login(formData.email, formData.password, formData.remember);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Login failed. Please check your credentials.";
+      const message =
+        err instanceof Error ? err.message : "Login failed. Please check your credentials.";
       setError(message);
     } finally {
       setIsLoading(false);
@@ -108,38 +109,29 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
   };
 
   return (
-    <section className="login-form-section">
-      <div className="login-form-card">
-        <div className="login-form-header">
-          <h2>Welcome Back</h2>
-          <p>Sign in to access your compliance dashboard and security reports.</p>
+    <section className="flex items-stretch justify-center rounded-3xl">
+      <div className="h-full w-full max-w-[480px] rounded-[18px] bg-[rgba(15,35,56,0.9)] p-9 shadow-[0_30px_60px_rgba(5,9,20,0.45)]">
+        <div>
+          <h2 className="mb-2 text-3xl font-semibold text-white">Welcome Back</h2>
+          <p className="text-slate-300">
+            Sign in to access your compliance dashboard and security reports.
+          </p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit}>
           {error && (
-            <div
-              className="error-message"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "12px",
-                backgroundColor: "rgba(239, 68, 68, 0.1)",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-                borderRadius: "8px",
-                color: "#ef4444",
-                marginBottom: "16px",
-              }}
-            >
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-3 text-red-400">
               <AlertCircle size={18} />
               <span>{error}</span>
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <div className="input-wrapper">
-              <Mail className="input-icon" size={18} />
+          <div>
+            <label htmlFor="email" className="mb-1 block font-medium text-slate-300">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
               <input
                 id="email"
                 name="email"
@@ -149,14 +141,17 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="w-full rounded-xl border-2 border-blue-500/20 bg-white/5 py-4 pl-12 pr-4 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <div className="input-wrapper">
-              <Lock className="input-icon" size={18} />
+          <div>
+            <label htmlFor="password" className="mb-1 block font-medium text-slate-300">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" size={18} />
               <input
                 id="password"
                 name="password"
@@ -166,46 +161,44 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
+                className="w-full rounded-xl border-2 border-blue-500/20 bg-white/5 py-4 pl-12 pr-12 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:bg-white/10 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
               />
               <button
                 type="button"
-                className="password-toggle"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 disabled={isLoading}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 transition hover:text-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
 
-          <div className="form-options">
-            <label className="checkbox-wrapper">
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex cursor-pointer items-center gap-2 text-slate-300">
               <input
                 type="checkbox"
                 name="remember"
                 checked={formData.remember}
                 onChange={handleChange}
+                className="h-[18px] w-[18px] accent-blue-500"
               />
               <span>Remember me</span>
             </label>
-            <a className="forgot-link" href="#">
+            <a className="text-blue-500 hover:text-blue-400" href="#">
               Forgot password?
             </a>
           </div>
 
           <button
-  type="submit"
-  className="btn-signin"
-  disabled={isLoading}
-  >
+            type="submit"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 px-4 py-4 text-base font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                  style={{ animation: "spin 1s linear infinite" }}
-                />
+                <Loader2 size={18} className="animate-spin" />
                 <span>Signing in...</span>
               </>
             ) : (
@@ -217,32 +210,43 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
           </button>
         </form>
 
-        <div className="divider">
-          <span>Or sign in with</span>
+        <div className="my-8 flex items-center text-xs uppercase tracking-wide text-slate-300 before:h-px before:flex-1 before:bg-blue-500/20 before:content-[''] after:h-px after:flex-1 after:bg-blue-500/20 after:content-['']">
+          <span className="px-4">Or sign in with</span>
         </div>
 
-        <div className={`social-login ${socialButtons.length === 1 ? "single" : ""}`}>
+        <div
+          className={`mb-6 grid gap-4 ${
+            socialButtons.length === 1 ? "grid-cols-1 justify-items-center" : "grid-cols-2"
+          }`}
+        >
           {socialButtons.map((button) => (
             <button
               key={button.label}
               type="button"
-              className="social-btn"
+              className="flex w-full max-w-[280px] items-center justify-center gap-2 rounded-xl border-2 border-blue-500/20 bg-white/5 px-4 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:border-blue-500 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               onClick={() => handleSocialLogin(button.provider)}
               disabled={isLoading || Boolean(button.disabled)}
               aria-disabled={isLoading || button.disabled ? "true" : "false"}
               title={button.disabled ? "Coming soon" : `Continue with ${button.label}`}
             >
-              <span className={`social-icon social-icon--${button.provider}`} aria-hidden="true">
+              <span
+                className="grid h-8 w-8 place-items-center rounded-lg bg-white/10"
+                aria-hidden="true"
+              >
                 {button.icon}
               </span>
-              <span className="social-label">{button.label}</span>
+              <span>{button.label}</span>
             </button>
           ))}
         </div>
 
-        <p className="signup-text">
+        <p className="text-center text-[0.95rem] text-slate-300">
           Don&apos;t have an account?{" "}
-          <button type="button" onClick={onSignUpClick}>
+          <button
+            type="button"
+            onClick={onSignUpClick}
+            className="font-semibold text-blue-500 hover:text-blue-400"
+          >
             Create one
           </button>
         </p>
