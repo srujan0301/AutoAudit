@@ -137,6 +137,139 @@
   margin-top: 8px;
 }
 
+.readiness-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.readiness-state {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.readiness-state.ready {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+}
+
+.readiness-state.not-ready {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+}
+
+.readiness-card {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  background: var(--bg-tertiary);
+}
+
+.readiness-card.ready {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.readiness-card.not-ready {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.readiness-card h4 {
+  margin: 0 0 6px 0;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.readiness-card p {
+  margin: 0 0 10px 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.readiness-check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.readiness-check {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--bg-secondary);
+}
+
+.readiness-check.fail {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.readiness-check.warn {
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.readiness-check.pass {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.readiness-check-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.readiness-check-label {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.readiness-check-message {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.readiness-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+}
+
+.readiness-pill.pass {
+  background: rgba(16, 185, 129, 0.18);
+  color: #10b981;
+}
+
+.readiness-pill.warn {
+  background: rgba(249, 115, 22, 0.18);
+  color: #f97316;
+}
+
+.readiness-pill.fail {
+  background: rgba(239, 68, 68, 0.18);
+  color: #ef4444;
+}
+
+.readiness-hint {
+  margin-bottom: 14px;
+}
+
 .scans-list {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);

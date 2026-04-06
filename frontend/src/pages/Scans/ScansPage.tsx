@@ -2,7 +2,16 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Plus, CheckCircle, XCircle, Clock, Loader2, AlertCircle, PlayCircle, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getScans, getConnections, getBenchmarks, createScan, deleteScan, getSettings } from '../../api/client';
+import {
+  getScans,
+  getConnections,
+  getBenchmarks,
+  createScan,
+  deleteScan,
+  getSettings,
+  getScanReadiness,
+  type ScanReadinessResponse,
+} from '../../api/client';
 import { formatDateTimePartsAEST } from '../../utils/helpers';
 import './ScansPage.css';
 
@@ -72,6 +81,8 @@ const ScansPage: React.FC<ScansPageProps> = ({ sidebarWidth = 220, isDarkMode = 
     benchmark_key: navState?.preselect?.benchmark_key || '',
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isCheckingReadiness, setIsCheckingReadiness] = useState<boolean>(false);
+  const [readiness, setReadiness] = useState<ScanReadinessResponse | null>(null);
   const appliedNavStateRef = useRef<boolean>(false);
 
   const loadScans = useCallback(async (): Promise<void> => {
@@ -155,24 +166,81 @@ const ScansPage: React.FC<ScansPageProps> = ({ sidebarWidth = 220, isDarkMode = 
     setFormData(prev => ({ ...prev, [name]: value }));
   }
 
+  useEffect(() => {
+    // Any change to connection or benchmark invalidates the previous readiness result.
+    setReadiness(null);
+  }, [formData.m365_connection_id, formData.benchmark_key]);
+
+  function parseSelectedBenchmark(): { framework: string; benchmark: string; version: string } | null {
+    const parts = formData.benchmark_key.split('|');
+    if (parts.length !== 3) return null;
+    const [framework, benchmark, version] = parts;
+    if (!framework || !benchmark || !version) return null;
+    return { framework, benchmark, version };
+  }
+
+  async function handleRunReadinessCheck(): Promise<void> {
+    setError(null);
+    setReadiness(null);
+
+    if (!formData.m365_connection_id) {
+      setError('Select a cloud platform before running readiness checks.');
+      return;
+    }
+
+    const parsedBenchmark = parseSelectedBenchmark();
+    if (!parsedBenchmark) {
+      setError('Select a benchmark before running readiness checks.');
+      return;
+    }
+
+    setIsCheckingReadiness(true);
+    try {
+      const readinessResult = await getScanReadiness(token, {
+        m365_connection_id: parseInt(formData.m365_connection_id, 10),
+        framework: parsedBenchmark.framework,
+        benchmark: parsedBenchmark.benchmark,
+        version: parsedBenchmark.version,
+      });
+      setReadiness(readinessResult);
+      if (!readinessResult.ready) {
+        setError('Environment is not ready. Resolve the critical checks shown below.');
+      }
+    } catch (err: unknown) {
+      setError((err as any)?.message || 'Failed to run readiness checks');
+    } finally {
+      setIsCheckingReadiness(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
 
-    try {
-      // Parse the benchmark key (format: "framework|benchmark|version")
-      const [framework, benchmark, version] = formData.benchmark_key.split('|');
+    if (!readiness?.ready) {
+      setError('Run pre-scan readiness check and resolve blockers before starting a scan.');
+      return;
+    }
 
+    const parsedBenchmark = parseSelectedBenchmark();
+    if (!parsedBenchmark) {
+      setError('Invalid benchmark selection. Please select a benchmark again.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const newScan = await createScan(token, {
         m365_connection_id: parseInt(formData.m365_connection_id, 10),
-        framework,
-        benchmark,
-        version,
+        framework: parsedBenchmark.framework,
+        benchmark: parsedBenchmark.benchmark,
+        version: parsedBenchmark.version,
       });
 
       setScans(prev => [newScan, ...prev]);
       setFormData({ m365_connection_id: '', benchmark_key: '' });
+      setReadiness(null);
       setShowForm(false);
     } catch (err: unknown) {
       setError((err as any)?.message || 'Failed to create scan');
@@ -339,6 +407,58 @@ const ScansPage: React.FC<ScansPageProps> = ({ sidebarWidth = 220, isDarkMode = 
                   </select>
                 </div>
               </div>
+              <div className="readiness-controls">
+                <button
+                  type="button"
+                  className="toolbar-button secondary"
+                  onClick={handleRunReadinessCheck}
+                  disabled={
+                    isSubmitting ||
+                    isCheckingReadiness ||
+                    !formData.m365_connection_id ||
+                    !formData.benchmark_key
+                  }
+                >
+                  {isCheckingReadiness ? (
+                    <>
+                      <Loader2 size={16} className="spinning" />
+                      <span>Checking...</span>
+                    </>
+                  ) : (
+                    <span>Run Readiness Check</span>
+                  )}
+                </button>
+                {readiness ? (
+                  <span className={`readiness-state ${readiness.ready ? 'ready' : 'not-ready'}`}>
+                    {readiness.ready ? 'Ready' : 'Not Ready'}
+                  </span>
+                ) : null}
+              </div>
+
+              {readiness ? (
+                <div className={`readiness-card ${readiness.ready ? 'ready' : 'not-ready'}`}>
+                  <h4>Pre-scan readiness</h4>
+                  <p>{readiness.summary}</p>
+                  <ul className="readiness-check-list">
+                    {readiness.checks.map(check => (
+                      <li key={check.key} className={`readiness-check ${check.status}`}>
+                        <div className="readiness-check-main">
+                          <span className="readiness-check-label">{check.label}</span>
+                          <span className={`readiness-pill ${check.status}`}>
+                            {check.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="readiness-check-message">{check.message}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="warning-banner readiness-hint">
+                  <AlertCircle size={18} />
+                  <span>Run readiness check before starting a scan.</span>
+                </div>
+              )}
 
               <div className="form-actions">
                 <button
@@ -352,7 +472,7 @@ const ScansPage: React.FC<ScansPageProps> = ({ sidebarWidth = 220, isDarkMode = 
                 <button
                   type="submit"
                   className="toolbar-button primary"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !readiness?.ready}
                 >
                   {isSubmitting ? (
                     <>
