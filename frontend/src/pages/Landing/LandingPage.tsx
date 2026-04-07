@@ -47,7 +47,7 @@ const LandingPage = ({ onSignInClick }: LandingPageProps) => {
         Skip to main content
       </a>
       <LandingHeader onSignInClick={onSignInClick} />
-      <main id="main-content">
+      <main id="main-content" className="scroll-mt-28">
         <HeroSection onSignInClick={onSignInClick} />
         <FeaturesSection />
         <BenefitsSection />

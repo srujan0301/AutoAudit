@@ -15,7 +15,7 @@ const FeatureCard = ({ icon: Icon, title, description }: LandingFeature) => (
 const FeaturesSection = () => {
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-br from-[#0a1628] via-[#0f1f38] to-[#162a4a] px-[5%] py-24"
+      className="relative scroll-mt-28 overflow-hidden bg-gradient-to-br from-[#0a1628] via-[#0f1f38] to-[#162a4a] px-[5%] py-24"
       id="features"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(59,130,246,0.08),transparent_62%),radial-gradient(circle_at_88%_22%,rgba(37,99,235,0.06),transparent_60%)]" />
