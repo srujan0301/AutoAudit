@@ -18,7 +18,7 @@
       "benchmark_audit_type": "Automated",
       "automation_status": "ready",
       "data_collector_id": "entra.roles.cloud_only_admins",
-      "policy_file": "1.1.1_admin_cloud_only_NOTEXIST.rego",
+      "policy_file": "1.1.1_admin_cloud_only.rego",
       "requires_permissions": ["User.Read.All", "RoleManagement.Read.Directory"],
       "notes": null
     },
