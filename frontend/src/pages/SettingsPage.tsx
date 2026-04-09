@@ -8,12 +8,6 @@ type SettingsPageProps = {
   isDarkMode?: boolean;
 };
 
-const secondaryButtonClass =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-[rgb(var(--border-subtle))] bg-surface-2 px-4 py-2 text-sm font-medium text-text-strong transition-all duration-300 hover:-translate-y-px hover:bg-[rgb(var(--border-subtle))] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
-
-const primaryButtonClass =
-  "inline-flex items-center justify-center gap-2 rounded-lg border border-[rgb(var(--accent-teal)/0.4)] bg-[rgb(var(--accent-teal))] px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0";
-
 export default function SettingsPage({ sidebarWidth = 220, isDarkMode = true }: SettingsPageProps) {
   const { token } = useAuth();
   const [confirmDeleteEnabled, setConfirmDeleteEnabled] = useState(true);
@@ -142,7 +136,7 @@ export default function SettingsPage({ sidebarWidth = 220, isDarkMode = true }: 
             <div className="mt-4 flex flex-wrap justify-end gap-3">
               <button
                 type="button"
-                className={secondaryButtonClass}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[rgb(var(--border-subtle))] bg-surface-2 px-4 py-2 text-sm font-medium text-text-strong transition-all duration-300 hover:-translate-y-px hover:bg-[rgb(var(--border-subtle))] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                 onClick={handleReset}
                 disabled={!hasChanges || isSaving}
               >
@@ -150,7 +144,7 @@ export default function SettingsPage({ sidebarWidth = 220, isDarkMode = true }: 
               </button>
               <button
                 type="button"
-                className={primaryButtonClass}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[rgb(var(--accent-teal)/0.4)] bg-[rgb(var(--accent-teal))] px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-px hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                 onClick={handleSave}
                 disabled={!hasChanges || isSaving}
               >
