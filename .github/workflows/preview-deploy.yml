@@ -156,10 +156,20 @@ jobs:
             echo "Created Neon branch: ${BRANCH_ID}"
           fi
 
+          if [ -z "$BRANCH_ID" ] || [ "$BRANCH_ID" = "null" ]; then
+            echo "ERROR: Failed to get or create Neon branch (BRANCH_ID=${BRANCH_ID})"
+            exit 1
+          fi
+
           CONN=$(curl -s \
             -H "Authorization: Bearer ${NEON_API_KEY}" \
             "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/connection_uri?branch_id=${BRANCH_ID}&database_name=neondb&role_name=neondb_owner")
           DB_URL=$(echo "$CONN" | jq -r '.uri')
+
+          if [ -z "$DB_URL" ] || [ "$DB_URL" = "null" ]; then
+            echo "ERROR: Failed to get Neon connection URI (response: ${CONN})"
+            exit 1
+          fi
 
           # asyncpg requires postgresql+asyncpg:// scheme
           ASYNCPG_URL="${DB_URL/postgresql:\/\//postgresql+asyncpg:\/\/}"
@@ -179,8 +189,7 @@ jobs:
             FRONTEND_URL="https://pr-${{ steps.pr.outputs.number }}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app" \
             OPA_URL="http://localhost:8181" \
             APP_ENV="preview" \
-            --app autoaudit-pr-${{ steps.pr.outputs.number }} \
-            --stage
+            --app autoaudit-pr-${{ steps.pr.outputs.number }}
 
       - name: Deploy backend to Fly
         env:
