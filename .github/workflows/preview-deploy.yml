@@ -150,7 +150,7 @@ jobs:
             RESPONSE=$(curl -s -X POST \
               -H "Authorization: Bearer ${NEON_API_KEY}" \
               -H "Content-Type: application/json" \
-              -d "{\"branch\": {\"name\": \"${BRANCH_NAME}\"}}" \
+              -d "{\"branch\": {\"name\": \"${BRANCH_NAME}\"}, \"endpoints\": [{\"type\": \"read_write\"}]}" \
               "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches")
             BRANCH_ID=$(echo "$RESPONSE" | jq -r '.branch.id')
             echo "Created Neon branch: ${BRANCH_ID}"
@@ -159,6 +159,29 @@ jobs:
           if [ -z "$BRANCH_ID" ] || [ "$BRANCH_ID" = "null" ]; then
             echo "ERROR: Failed to get or create Neon branch (BRANCH_ID=${BRANCH_ID})"
             exit 1
+          fi
+
+          # Ensure a read_write compute endpoint exists for the branch (may be missing on reused branches)
+          ENDPOINT_ID=$(curl -s \
+            -H "Authorization: Bearer ${NEON_API_KEY}" \
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/endpoints" \
+          | jq -r --arg bid "$BRANCH_ID" '.endpoints[] | select(.branch_id == $bid and .type == "read_write") | .id' | head -1)
+
+          if [ -z "$ENDPOINT_ID" ] || [ "$ENDPOINT_ID" = "null" ]; then
+            echo "No compute endpoint found for branch ${BRANCH_ID}, creating one..."
+            EP_RESPONSE=$(curl -s -X POST \
+              -H "Authorization: Bearer ${NEON_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"endpoint\": {\"branch_id\": \"${BRANCH_ID}\", \"type\": \"read_write\"}}" \
+              "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/endpoints")
+            ENDPOINT_ID=$(echo "$EP_RESPONSE" | jq -r '.endpoint.id')
+            if [ -z "$ENDPOINT_ID" ] || [ "$ENDPOINT_ID" = "null" ]; then
+              echo "ERROR: Failed to create endpoint (response: ${EP_RESPONSE})"
+              exit 1
+            fi
+            echo "Created endpoint: ${ENDPOINT_ID}"
+          else
+            echo "Found existing endpoint: ${ENDPOINT_ID}"
           fi
 
           CONN=$(curl -s \
