@@ -186,10 +186,11 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.PREVIEW_FLY_API_TOKEN }}
         run: |
+          IMAGE="${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${{ steps.pr.outputs.number }}"
           flyctl deploy \
             --app autoaudit-pr-${{ steps.pr.outputs.number }} \
             --config fly.preview.toml \
-            --image "${{ needs.build-push-backend-image.outputs.image-tag }}" \
+            --image "$IMAGE" \
             --strategy immediate \
             --wait-timeout 120
 
