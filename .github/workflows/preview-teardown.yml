@@ -13,11 +13,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Resolve PR number
+        id: pr
+        run: |
+          echo "number=${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.PREVIEW_GCP_CREDENTIALS }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Delete Cloud Run service
+        env:
+          GCP_PROJECT_ID: ${{ secrets.PREVIEW_GCP_PROJECT_ID }}
+        run: |
+          gcloud run services delete "autoaudit-pr-${{ steps.pr.outputs.number }}" \
+            --region us-central1 \
+            --project "$GCP_PROJECT_ID" \
+            --quiet || true
+
+      - name: Delete Neon branch
+        env:
+          NEON_API_KEY: ${{ secrets.PREVIEW_NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.PREVIEW_NEON_PROJECT_ID }}
+        run: |
+          BRANCH_NAME="pr-${{ steps.pr.outputs.number }}"
+
+          BRANCH_ID=$(curl -s \
+            -H "Authorization: Bearer ${NEON_API_KEY}" \
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches" \
+          | jq -r --arg name "$BRANCH_NAME" '.branches[] | select(.name == $name) | .id')
+
+          if [ -n "$BRANCH_ID" ] && [ "$BRANCH_ID" != "null" ]; then
+            curl -s -X DELETE \
+              -H "Authorization: Bearer ${NEON_API_KEY}" \
+              "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches/${BRANCH_ID}"
+            echo "Deleted Neon branch: ${BRANCH_ID} (${BRANCH_NAME})"
+          else
+            echo "No Neon branch found for ${BRANCH_NAME}, skipping"
+          fi
+
       - name: Find existing preview comment
         id: find-comment
         uses: peter-evans/find-comment@v3
         with:
-          issue-number: ${{ github.event.number }}
+          issue-number: ${{ steps.pr.outputs.number }}
           comment-author: github-actions[bot]
           body-includes: "<!-- autoaudit-preview -->"
 
@@ -26,7 +69,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ github.event.number }}
+          issue-number: ${{ steps.pr.outputs.number }}
           edit-mode: replace
           body: |
             <!-- autoaudit-preview -->
