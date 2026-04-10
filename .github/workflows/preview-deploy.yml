@@ -180,8 +180,11 @@ jobs:
             exit 1
           fi
 
-          # asyncpg requires postgresql+asyncpg:// scheme
-          ASYNCPG_URL="${DB_URL/postgresql:\/\//postgresql+asyncpg:\/\/}"
+          # Strip all query params from the Neon URL — channel_binding is not supported by asyncpg
+          # and causes a TypeError on connect. Re-add sslmode=require which SQLAlchemy's asyncpg
+          # dialect translates correctly into an SSL context.
+          BASE_URL="${DB_URL%%\?*}"
+          ASYNCPG_URL="${BASE_URL/postgresql:\/\//postgresql+asyncpg:\/\/}?sslmode=require"
 
           echo "database-url=${ASYNCPG_URL}" >> "$GITHUB_OUTPUT"
 
@@ -208,6 +211,7 @@ jobs:
             --min-instances 0 \
             --max-instances 3 \
             --memory 512Mi \
+            --cpu-boost \
             --set-env-vars "APP_ENV=preview,OPA_URL=http://localhost:8181,SECRET_KEY=${SECRET_KEY},ENCRYPTION_KEY=${ENCRYPTION_KEY},DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL},FRONTEND_URL=${FRONTEND_URL}" \
             --project "$GCP_PROJECT_ID"
 
