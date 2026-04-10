@@ -182,11 +182,12 @@ jobs:
             exit 1
           fi
 
-          # Strip all query params from the Neon URL — channel_binding is not supported by asyncpg
-          # and causes a TypeError on connect. Re-add sslmode=require which SQLAlchemy's asyncpg
-          # dialect translates correctly into an SSL context.
+          # Strip all query params from the Neon URL (channel_binding and sslmode are libpq-only
+          # and not handled by all SQLAlchemy 2.0.x asyncpg dialect versions).
+          # Use ssl=require — SQLAlchemy's asyncpg dialect explicitly converts "require" → True
+          # before passing to asyncpg.connect(), so asyncpg receives ssl=True (a valid value).
           BASE_URL="${DB_URL%%\?*}"
-          ASYNCPG_URL="${BASE_URL/postgresql:\/\//postgresql+asyncpg:\/\/}?sslmode=require"
+          ASYNCPG_URL="${BASE_URL/postgresql:\/\//postgresql+asyncpg:\/\/}?ssl=require"
 
           echo "database-url=${ASYNCPG_URL}" >> "$GITHUB_OUTPUT"
 
