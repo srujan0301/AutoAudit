@@ -170,9 +170,11 @@ jobs:
             echo "Found existing endpoint: ${ENDPOINT_ID}"
           fi
 
+          # pooled=false → direct connection (no PgBouncer); asyncpg is incompatible with
+          # Neon's pooler because it uses extended query protocol features PgBouncer blocks.
           CONN=$(curl -s \
             -H "Authorization: Bearer ${NEON_API_KEY}" \
-            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/connection_uri?branch_id=${BRANCH_ID}&database_name=neondb&role_name=neondb_owner")
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/connection_uri?branch_id=${BRANCH_ID}&database_name=neondb&role_name=neondb_owner&pooled=false")
           DB_URL=$(echo "$CONN" | jq -r '.uri')
 
           if [ -z "$DB_URL" ] || [ "$DB_URL" = "null" ]; then
