@@ -151,26 +151,27 @@ const SignupFormPanel = ({
 
   return (
     <section
-      className="flex w-full items-center justify-center"
+      className="flex items-stretch justify-center rounded-[24px]"
       aria-labelledby="signup-form-heading"
     >
-      <div className="w-full max-w-lg rounded-3xl bg-[#0d2746] p-8 shadow-2xl">
+      <div className="h-full w-full max-w-[480px] rounded-[18px] bg-[rgba(15,35,56,0.9)] p-9 shadow-[0_30px_60px_rgba(5,9,20,0.45)]">
         <header className="mb-8">
-          <h2 id="signup-form-heading" className="text-5xl font-semibold text-white">
+          <h2 id="signup-form-heading" className="mb-2 text-[2rem] leading-tight text-white">
             Create Account
           </h2>
-          <p className="mt-3 text-lg text-blue-100">
-            Start your compliance journey with AutoAudit.
-          </p>
+          <p className="text-[#b0c4de]">Start your compliance journey with AutoAudit.</p>
         </header>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {inputFields.slice(0, 2).map((field) => (
-              <label key={field.name} className="flex flex-col gap-2">
-                <span className="text-base font-medium text-white">{field.label}</span>
-                <div className="flex items-center rounded-2xl border border-blue-800 bg-[#173454] px-4 py-3 focus-within:border-blue-500">
-                  <span className="mr-3 text-blue-200" aria-hidden="true">
+              <label key={field.name} className="flex flex-col">
+                <span className="mb-[0.4rem] text-[#b0c4de]">{field.label}</span>
+                <div className="relative">
+                  <span
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b82f6]"
+                    aria-hidden="true"
+                  >
                     {field.icon}
                   </span>
                   <input
@@ -180,7 +181,7 @@ const SignupFormPanel = ({
                     onChange={handleChange}
                     placeholder={field.placeholder}
                     required
-                    className="w-full bg-transparent text-white outline-none placeholder:text-blue-200"
+                    className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
                   />
                 </div>
               </label>
@@ -188,10 +189,13 @@ const SignupFormPanel = ({
           </div>
 
           {inputFields.slice(2).map((field) => (
-            <label key={field.name} className="flex flex-col gap-2">
-              <span className="text-base font-medium text-white">{field.label}</span>
-              <div className="flex items-center rounded-2xl border border-blue-800 bg-[#173454] px-4 py-3 focus-within:border-blue-500">
-                <span className="mr-3 text-blue-200" aria-hidden="true">
+            <label key={field.name} className="flex flex-col">
+              <span className="mb-[0.4rem] text-[#b0c4de]">{field.label}</span>
+              <div className="relative">
+                <span
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b82f6]"
+                  aria-hidden="true"
+                >
                   {field.icon}
                 </span>
                 <input
@@ -201,16 +205,19 @@ const SignupFormPanel = ({
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   required
-                  className="w-full bg-transparent text-white outline-none placeholder:text-blue-200"
+                  className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
                 />
               </div>
             </label>
           ))}
 
-          <label className="flex flex-col gap-2">
-            <span className="text-base font-medium text-white">Password</span>
-            <div className="flex items-center rounded-2xl border border-blue-800 bg-[#173454] px-4 py-3 focus-within:border-blue-500">
-              <span className="mr-3 text-blue-200" aria-hidden="true">
+          <label className="flex flex-col">
+            <span className="mb-[0.4rem] text-[#b0c4de]">Password</span>
+            <div className="relative">
+              <span
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b82f6]"
+                aria-hidden="true"
+              >
                 <ShieldCheck size={16} />
               </span>
               <input
@@ -220,11 +227,11 @@ const SignupFormPanel = ({
                 onChange={handleChange}
                 placeholder="Create a strong password"
                 required
-                className="w-full bg-transparent text-white outline-none placeholder:text-blue-200"
+                className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
               />
               <button
                 type="button"
-                className="ml-3 text-blue-200 hover:text-white"
+                className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent text-[#b0c4de] transition hover:text-[#3b82f6]"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -233,10 +240,13 @@ const SignupFormPanel = ({
             </div>
           </label>
 
-          <label className="flex flex-col gap-2">
-            <span className="text-base font-medium text-white">Confirm Password</span>
-            <div className="flex items-center rounded-2xl border border-blue-800 bg-[#173454] px-4 py-3 focus-within:border-blue-500">
-              <span className="mr-3 text-blue-200" aria-hidden="true">
+          <label className="flex flex-col">
+            <span className="mb-[0.4rem] text-[#b0c4de]">Confirm Password</span>
+            <div className="relative">
+              <span
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3b82f6]"
+                aria-hidden="true"
+              >
                 <ShieldCheck size={16} />
               </span>
               <input
@@ -246,11 +256,11 @@ const SignupFormPanel = ({
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 required
-                className="w-full bg-transparent text-white outline-none placeholder:text-blue-200"
+                className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
               />
               <button
                 type="button"
-                className="ml-3 text-blue-200 hover:text-white"
+                className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent text-[#b0c4de] transition hover:text-[#3b82f6]"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
               >
@@ -259,75 +269,79 @@ const SignupFormPanel = ({
             </div>
           </label>
 
-          <label className="flex items-start gap-3 text-sm text-blue-100">
+          <label className="flex cursor-pointer items-start gap-2 text-[#b0c4de]">
             <input
               type="checkbox"
               checked={agreeTerms}
               onChange={handleAgreeTermsChange}
-              className="mt-1"
+              className="mt-[2px] h-[18px] w-[18px] accent-[#3b82f6]"
             />
             <span>
               I agree to the{" "}
-              <a href="/#terms" className="text-white underline">
+              <a href="/#terms" className="text-[#3b82f6] no-underline">
                 Terms & Conditions
               </a>{" "}
               and{" "}
-              <a href="/#privacy" className="text-white underline">
+              <a href="/#privacy" className="text-[#3b82f6] no-underline">
                 Privacy Policy
               </a>
             </span>
           </label>
 
           {(error || submitError) && (
-            <p className="text-sm text-red-400" role="alert">
+            <p
+              className="rounded-[6px] border border-[rgba(255,80,80,0.3)] bg-[rgba(255,80,80,0.08)] px-[10px] py-2 text-[13px] text-[#ff6b6b]"
+              role="alert"
+            >
               {error || submitError}
             </p>
           )}
 
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-500 py-4 text-lg font-semibold text-white transition hover:bg-blue-600"
+            className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(135deg,#3b82f6_0%,#2563eb_100%)] px-4 py-4 text-[1rem] font-semibold text-white transition hover:-translate-y-[2px] hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)]"
           >
             <span>Create Account</span>
             <ArrowRight size={18} />
           </button>
         </form>
 
-        <div className="relative my-8 text-center">
-          <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-blue-800" />
-          <span className="relative bg-[#0d2746] px-4 text-sm uppercase tracking-widest text-blue-100">
-            Or sign up with
-          </span>
+        <div className="my-8 flex items-center text-[0.8rem] uppercase tracking-[1px] text-[#b0c4de] before:h-px before:flex-1 before:bg-[rgba(59,130,246,0.2)] before:content-[''] after:h-px after:flex-1 after:bg-[rgba(59,130,246,0.2)] after:content-['']">
+          <span className="px-4">Or sign up with</span>
         </div>
 
-        <div className="flex justify-center">
+        <div
+          className={`mb-6 grid gap-4 ${
+            socialButtons.length === 1 ? "grid-cols-1 justify-items-center" : "grid-cols-2"
+          }`}
+        >
           {socialButtons.map((button) => (
             <button
               key={button.label}
               type="button"
-              className="flex min-w-[230px] items-center justify-center gap-3 rounded-2xl border border-blue-800 bg-[#173454] px-6 py-3 text-white transition hover:bg-[#1d3d63]"
+              className="flex w-full max-w-[280px] items-center justify-center gap-2 rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.04)] px-4 py-[0.9rem] font-semibold text-white transition hover:-translate-y-[2px] hover:border-[#3b82f6]"
               onClick={() => handleSocialSignUp(button.provider)}
               disabled={Boolean(button.disabled)}
               aria-disabled={button.disabled ? "true" : "false"}
               title={button.disabled ? "Coming soon" : `Continue with ${button.label}`}
             >
               <span
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-[#23476f]"
+                className="grid h-8 w-8 place-items-center rounded-[10px] bg-[rgba(255,255,255,0.08)]"
                 aria-hidden="true"
               >
                 {button.icon}
               </span>
-              <span className="font-medium text-white">{button.label}</span>
+              <span>{button.label}</span>
             </button>
           ))}
         </div>
 
-        <p className="mt-8 text-center text-sm text-blue-100">
+        <p className="text-center text-[0.95rem] text-[#b0c4de]">
           Already have an account?{" "}
           <button
             type="button"
             onClick={onBackToLogin}
-            className="font-semibold text-white hover:underline"
+            className="border-none bg-transparent font-semibold text-[#3b82f6]"
           >
             Sign In
           </button>
