@@ -84,6 +84,29 @@ jobs:
             echo "No Neon branch found for ${BRANCH_NAME}, skipping"
           fi
 
+      - name: Delete Netlify preview deploy
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.PREVIEW_NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.PREVIEW_NETLIFY_SITE_ID }}
+        run: |
+          BRANCH_NAME="pr-${{ steps.pr.outputs.number }}"
+
+          DEPLOY_IDS=$(curl -s \
+            -H "Authorization: Bearer ${NETLIFY_AUTH_TOKEN}" \
+            "https://api.netlify.com/api/v1/sites/${NETLIFY_SITE_ID}/deploys?per_page=100" \
+          | jq -r --arg branch "$BRANCH_NAME" '.[] | select(.branch == $branch) | .id')
+
+          if [ -z "$DEPLOY_IDS" ]; then
+            echo "No Netlify deploys found for branch ${BRANCH_NAME}, skipping"
+          else
+            for DEPLOY_ID in $DEPLOY_IDS; do
+              curl -s -X DELETE \
+                -H "Authorization: Bearer ${NETLIFY_AUTH_TOKEN}" \
+                "https://api.netlify.com/api/v1/deploys/${DEPLOY_ID}"
+              echo "Deleted Netlify deploy: ${DEPLOY_ID}"
+            done
+          fi
+
       - name: Find existing preview comment
         id: find-comment
         uses: peter-evans/find-comment@v3
