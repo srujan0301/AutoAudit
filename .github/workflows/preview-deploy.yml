@@ -55,10 +55,12 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 1 — Build & deploy frontend to Netlify
+  # Runs after deploy-backend-preview so VITE_API_URL can be set to the real
+  # Cloud Run URL (which isn't known until after the first backend deploy).
   # ─────────────────────────────────────────────────────────────────────────────
   build-frontend:
     runs-on: ubuntu-latest
-    needs: gate
+    needs: [gate, deploy-backend-preview]
     outputs:
       netlify-url: ${{ steps.deploy.outputs.deploy-url }}
       pr-number: ${{ needs.gate.outputs.pr-number }}
@@ -81,9 +83,7 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         env:
-          # TODO: wire up to backend preview URL once build-frontend no longer
-          # runs in parallel with deploy-backend-preview
-          VITE_API_URL: http://localhost:8000
+          VITE_API_URL: ${{ needs.deploy-backend-preview.outputs.backend-url }}
         run: npm run build
 
       - name: Deploy to Netlify
