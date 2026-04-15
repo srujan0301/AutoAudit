@@ -1,0 +1,30 @@
+name: Preview Instructions
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  post-instructions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post preview environment instructions
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.number }}
+          body: |
+            <!-- autoaudit-preview-instructions -->
+            ## Preview Environment
+
+            A preview environment can be spun up on demand for this PR.
+
+            | Action | How |
+            |---|---|
+            | **Spin up preview** | Add the label `deploy-preview` to this PR |
+            | **Tear down preview** | Add the label `teardown-preview` to this PR |
+
+            > The environment will also be torn down automatically when the PR is closed or merged.
+            > Preview URLs will appear in a follow-up comment once the deploy completes (~5 min).
