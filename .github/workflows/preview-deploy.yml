@@ -30,6 +30,7 @@ jobs:
        github.event.label.name == 'deploy-preview')
     outputs:
       pr-number: ${{ steps.pr.outputs.number }}
+      short-sha: ${{ steps.sha.outputs.short }}
 
     steps:
       - name: Resolve PR number
@@ -39,6 +40,15 @@ jobs:
             echo "number=${{ github.event.number }}" >> "$GITHUB_OUTPUT"
           else
             echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve short SHA
+        id: sha
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "short=$(echo '${{ github.event.pull_request.head.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
+          else
+            echo "short=$(echo '${{ github.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Remove deploy-preview label
@@ -121,7 +131,8 @@ jobs:
       - name: Build & push backend image
         run: |
           PR_NUM=${{ needs.gate.outputs.pr-number }}
-          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${PR_NUM}"
+          SHA=${{ needs.gate.outputs.short-sha }}
+          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${PR_NUM}-${SHA}"
           docker build \
             -f backend-api/Dockerfile \
             -t "$IMAGE" \
@@ -232,7 +243,7 @@ jobs:
           FRONTEND_URL: "https://pr-${{ needs.gate.outputs.pr-number }}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app"
         run: |
           SERVICE="autoaudit-pr-${{ needs.gate.outputs.pr-number }}"
-          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${{ needs.gate.outputs.pr-number }}"
+          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${{ needs.gate.outputs.pr-number }}-${{ needs.gate.outputs.short-sha }}"
           REGION="us-central1"
 
           gcloud run deploy "$SERVICE" \
