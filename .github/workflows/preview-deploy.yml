@@ -19,8 +19,6 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 0 — Gate: validate trigger, resolve PR number, remove consumed label
   # Triggered by adding the "deploy-preview" label to the PR.
-  # Using pull_request (not issue_comment) so the workflow runs from the PR
-  # branch HEAD, not from main — allowing pre-merge testing.
   # ─────────────────────────────────────────────────────────────────────────────
   gate:
     runs-on: ubuntu-latest
