@@ -1,8 +1,8 @@
 name: Preview Deploy
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -13,23 +13,55 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
-  # Job 1 — Build & deploy frontend to Netlify
+  # Job 0 — Gate: validate trigger, resolve PR number, acknowledge comment
   # ─────────────────────────────────────────────────────────────────────────────
-  build-frontend:
+  gate:
     runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '/deploy-preview'))
     outputs:
-      netlify-url: ${{ steps.deploy.outputs.deploy-url }}
       pr-number: ${{ steps.pr.outputs.number }}
 
     steps:
       - name: Resolve PR number
         id: pr
         run: |
-          echo "number=${{ github.event.number || inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+          fi
 
+      - name: Acknowledge comment with reaction
+        if: github.event_name == 'issue_comment'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'eyes'
+            });
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1 — Build & deploy frontend to Netlify
+  # ─────────────────────────────────────────────────────────────────────────────
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: gate
+    outputs:
+      netlify-url: ${{ steps.deploy.outputs.deploy-url }}
+      pr-number: ${{ needs.gate.outputs.pr-number }}
+
+    steps:
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -59,8 +91,8 @@ jobs:
           publish-dir: frontend/dist
           production-deploy: false
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "PR #${{ steps.pr.outputs.number }} — ${{ github.event.pull_request.title }}"
-          alias: pr-${{ steps.pr.outputs.number }}
+          deploy-message: "PR #${{ needs.gate.outputs.pr-number }} — preview deploy"
+          alias: pr-${{ needs.gate.outputs.pr-number }}
           enable-pull-request-comment: false
           enable-commit-comment: false
         env:
@@ -72,6 +104,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build-push-backend-image:
     runs-on: ubuntu-latest
+    needs: gate
 
     steps:
       - name: Checkout
@@ -85,7 +118,7 @@ jobs:
 
       - name: Build & push backend image
         run: |
-          PR_NUM=${{ github.event.number || inputs.pr_number }}
+          PR_NUM=${{ needs.gate.outputs.pr-number }}
           IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${PR_NUM}"
           docker build \
             -f backend-api/Dockerfile \
@@ -98,16 +131,11 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   deploy-backend-preview:
     runs-on: ubuntu-latest
-    needs: build-push-backend-image
+    needs: [gate, build-push-backend-image]
     outputs:
       backend-url: ${{ steps.deploy.outputs.backend-url }}
 
     steps:
-      - name: Resolve PR number
-        id: pr
-        run: |
-          echo "number=${{ github.event.number || inputs.pr_number }}" >> "$GITHUB_OUTPUT"
-
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
@@ -122,7 +150,7 @@ jobs:
           NEON_API_KEY: ${{ secrets.PREVIEW_NEON_API_KEY }}
           NEON_PROJECT_ID: ${{ secrets.PREVIEW_NEON_PROJECT_ID }}
         run: |
-          BRANCH_NAME="pr-${{ steps.pr.outputs.number }}"
+          BRANCH_NAME="pr-${{ needs.gate.outputs.pr-number }}"
 
           EXISTING=$(curl -s \
             -H "Authorization: Bearer ${NEON_API_KEY}" \
@@ -199,10 +227,10 @@ jobs:
           ENCRYPTION_KEY: ${{ secrets.PREVIEW_ENCRYPTION_KEY }}
           REDIS_URL: ${{ secrets.PREVIEW_UPSTASH_REDIS_URL }}
           DATABASE_URL: ${{ steps.neon.outputs.database-url }}
-          FRONTEND_URL: "https://pr-${{ steps.pr.outputs.number }}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app"
+          FRONTEND_URL: "https://pr-${{ needs.gate.outputs.pr-number }}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app"
         run: |
-          SERVICE="autoaudit-pr-${{ steps.pr.outputs.number }}"
-          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${{ steps.pr.outputs.number }}"
+          SERVICE="autoaudit-pr-${{ needs.gate.outputs.pr-number }}"
+          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${{ needs.gate.outputs.pr-number }}"
           REGION="us-central1"
 
           gcloud run deploy "$SERVICE" \
