@@ -1,32 +1,18 @@
 name: "Engine CI/CD"
 
 on:
-  # push:
-  #   branches: ['main', 'staging', 'dev']
+  push:
+    branches: [main]
+    paths:
+      - 'engine/**'
   pull_request:
-    branches: ['main']
-  # schedule:
-  #   - cron: '32 23 * * 6'
+    branches: [main]
+    paths:
+      - 'engine/**'
+  schedule:
+    - cron: '32 23 * * 6'
 
 jobs:
-  changes:
-    name: Allocating Push Filter
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    permissions:
-      pull-requests: read
-    outputs:
-      engine: ${{ steps.filter.outputs.engine }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            engine:
-              - 'engine/**'
-          base: ${{ github.ref }}
-
   analyze:
     name: Security Analysis on (${{ matrix.language }})
     runs-on: ubuntu-latest
@@ -99,57 +85,61 @@ jobs:
         working-directory: engine
         run: pytest --tb=line tests/test_wiring.py
 
-  # build-and-deploy:
-  #   name: Build and Deploy Engine
-  #   needs: [changes, analyze]
-  #   environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     id-token: write
-  #     security-events: write
-  #     packages: write
-  #     actions: write
-  #
-  #   steps:
-  #     - name: Checkout source code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ github.ref }}
-  #     - name: Set environment name
-  #       id: set-env
-  #       run: |
-  #         if [ "${{ github.ref_name }}" == "main" ]; then
-  #           echo "ENV_NAME=prod" >> $GITHUB_OUTPUT
-  #         else
-  #           echo "ENV_NAME=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-  #         fi
-  #
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v3
-  #       with:
-  #         username: ${{ secrets.DOCKER_USERNAME }}
-  #         password: ${{ secrets.DOCKER_PASSWORD }}
-  #
-  #     - name: Build and tag Docker image
-  #       run: |
-  #         docker build -t ${{ secrets.DOCKER_USERNAME }}/engine:${{ steps.set-env.outputs.ENV_NAME }} \
-  #           --build-arg ENV=${{ steps.set-env.outputs.ENV_NAME }} \
-  #           -f engine/docker/engine.Dockerfile .
-  #
-  #     - name: Push Docker image
-  #       run: |
-  #         docker push ${{ secrets.DOCKER_USERNAME }}/engine:${{ steps.set-env.outputs.ENV_NAME }}
-  #
-  #     - name: Scan Docker image with Grype
-  #       uses: anchore/scan-action@v6
-  #       with:
-  #         image: ${{ secrets.DOCKER_USERNAME }}/engine:${{ steps.set-env.outputs.ENV_NAME }}
-  #         fail-build: false
-  #         output-format: sarif
-  #         output-file: grype-report.sarif
-  #
-  #     - name: Upload SARIF to GitHub Security tab
-  #       uses: github/codeql-action/upload-sarif@v3
-  #       with:
-  #         sarif_file: grype-report.sarif
+  report:
+    name: Report PR status
+    needs: [analyze, run-lint, test]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const analyze = '${{ needs.analyze.result }}';
+            const lint    = '${{ needs.run-lint.result }}';
+            const test    = '${{ needs.test.result }}';
+
+            const icon = r => ({ success: '✅', failure: '❌', cancelled: '🚫', skipped: '⏭️' }[r] ?? '❓');
+            const allPassed = [analyze, lint, test].every(r => ['success', 'skipped'].includes(r));
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const marker = '<!-- ci-report-engine -->'; // used to find and update the existing comment
+
+            const body = [
+              marker,
+              `### CI: Engine`,
+              ``,
+              `| Job | Result |`,
+              `|---|---|`,
+              `| Security analysis (CodeQL) | ${icon(analyze)} \`${analyze}\` |`,
+              `| Lint | ${icon(lint)} \`${lint}\` |`,
+              `| Tests | ${icon(test)} \`${test}\` |`,
+              ``,
+              allPassed
+                ? `All checks passed.`
+                : `One or more checks failed. [View logs](${runUrl})`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
