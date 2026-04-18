@@ -25,4 +25,8 @@ ENV PYTHONPATH=/app
 COPY worker_entrypoint.sh .
 RUN chmod +x worker_entrypoint.sh
 
+# Run as non-root user for security
+RUN adduser --disabled-password --gecos "" --uid 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
 CMD ["./worker_entrypoint.sh"]

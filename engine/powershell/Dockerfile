@@ -23,5 +23,9 @@ RUN uv pip install --system -r pyproject.toml
 # Expose port
 EXPOSE 8001
 
+# Run as non-root user for security
+RUN useradd --uid 1000 --create-home appuser && chown -R appuser:appuser /app
+USER appuser
+
 # Run FastAPI service
 CMD ["python3", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]

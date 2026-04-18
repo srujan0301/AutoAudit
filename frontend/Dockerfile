@@ -15,5 +15,9 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
+# Run as non-root user for security
+RUN chown -R node:node /app
+USER node
+
 # Run development server
 CMD ["npm", "start"]

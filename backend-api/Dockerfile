@@ -34,5 +34,9 @@ RUN chmod +x entrypoint.sh
 # Expose port
 EXPOSE 8000
 
+# Run as non-root user for security
+RUN adduser --disabled-password --gecos "" --uid 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
 # Run migrations and start the application
 ENTRYPOINT ["./entrypoint.sh"]

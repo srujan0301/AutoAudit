@@ -7,5 +7,9 @@ RUN pwsh -NoProfile -Command " \
     Install-Module -Name MicrosoftTeams -Scope AllUsers -Force \
 "
 
+# Run as non-root user for security
+RUN useradd --uid 1000 --create-home appuser
+USER appuser
+
 # Set entrypoint to PowerShell
 ENTRYPOINT ["pwsh", "-NoProfile", "-NonInteractive", "-Command"]
