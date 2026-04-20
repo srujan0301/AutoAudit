@@ -38,3 +38,8 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "monthly"
+
+  - package-ecosystem: "docker"
+    directory: "/security"
+    schedule:
+      interval: "monthly"
