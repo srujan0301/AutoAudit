@@ -246,7 +246,7 @@ const ContactAdminPage: React.FC = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#0a1628] font-sans text-white">
-      <div className="mx-auto max-w-[1600px] px-[3%] py-8">
+      <div className="mx-auto max-w-400 px-[3%] py-8">
         <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="mb-2 text-3xl font-bold">Contact Submissions</h1>
@@ -269,7 +269,7 @@ const ContactAdminPage: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 gap-8 xl:grid-cols-[350px_minmax(0,1fr)]">
-          <section className="max-h-[400px] overflow-y-auto rounded-[20px] border border-cyan-400/10 bg-white/5 p-6 xl:max-h-[calc(100vh-160px)]">
+          <section className="max-h-100 overflow-y-auto rounded-[20px] border border-cyan-400/10 bg-white/5 p-6 xl:max-h-[calc(100vh-160px)]">
             {isLoading ? (
               <p className="text-slate-300">Loading submissions...</p>
             ) : submissions.length ? (
@@ -372,8 +372,8 @@ const ContactAdminPage: React.FC = () => {
                 <div className="mb-8 rounded-xl border border-cyan-400/10 bg-white/5 p-6">
                   <h3 className="mb-4 text-lg font-semibold">Message</h3>
                   <div
-                    className={`break-words whitespace-pre-wrap rounded-lg border border-cyan-400/10 bg-white/10 p-6 text-[15px] leading-8 text-slate-300 ${
-                      isLongMessage ? "h-[300px] overflow-y-auto" : ""
+                    className={`wrap-break-word whitespace-pre-wrap rounded-lg border border-cyan-400/10 bg-white/10 p-6 text-[15px] leading-8 text-slate-300 ${
+                      isLongMessage ? "h-75 overflow-y-auto" : ""
                     }`}
                   >
                     {selectedSubmission.message}
@@ -386,7 +386,7 @@ const ContactAdminPage: React.FC = () => {
                       Status
                     </label>
                     <select
-                      className="min-h-[46px] w-full rounded-xl border border-slate-700 bg-slate-700 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="min-h-11.5 w-full rounded-xl border border-slate-700 bg-slate-700 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/20 disabled:cursor-not-allowed disabled:opacity-60"
                       value={selectedSubmission.status}
                       onChange={(event) =>
                         handleUpdate({ status: event.target.value })
@@ -405,7 +405,7 @@ const ContactAdminPage: React.FC = () => {
                       Priority
                     </label>
                     <select
-                      className="min-h-[46px] w-full rounded-xl border border-slate-700 bg-slate-700 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="min-h-11.5 w-full rounded-xl border border-slate-700 bg-slate-700 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-300/20 disabled:cursor-not-allowed disabled:opacity-60"
                       value={selectedSubmission.priority}
                       onChange={(event) =>
                         handleUpdate({ priority: event.target.value })
@@ -422,7 +422,7 @@ const ContactAdminPage: React.FC = () => {
 
                 <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <button
-                    className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-4 font-semibold text-white shadow-lg shadow-cyan-400/30 transition hover:-translate-y-0.5 hover:shadow-cyan-400/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+                    className="rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 px-4 py-4 font-semibold text-white shadow-lg shadow-cyan-400/30 transition hover:-translate-y-0.5 hover:shadow-cyan-400/40 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                     onClick={() => handleUpdate({ assigned_to: currentUserId })}
                     disabled={currentUserId === undefined}
                     title={
@@ -435,7 +435,7 @@ const ContactAdminPage: React.FC = () => {
                   </button>
 
                   <button
-                    className="rounded-xl bg-gradient-to-r from-red-600 to-red-700 px-4 py-4 font-semibold text-white shadow-lg shadow-red-500/30 transition hover:-translate-y-0.5 hover:shadow-red-500/40"
+                    className="rounded-xl bg-linear-to-r from-red-600 to-red-700 px-4 py-4 font-semibold text-white shadow-lg shadow-red-500/30 transition hover:-translate-y-0.5 hover:shadow-red-500/40"
                     onClick={handleDelete}
                   >
                     Delete
@@ -445,7 +445,7 @@ const ContactAdminPage: React.FC = () => {
                 <div className="mb-8">
                   <h3 className="mb-4 text-lg font-semibold">Notes</h3>
                   <textarea
-                    className="min-h-[120px] w-full resize-y rounded-xl border-2 border-cyan-400/20 bg-white/10 p-4 text-[15px] text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:bg-white/15"
+                    className="min-h-30 w-full resize-y rounded-xl border-2 border-cyan-400/20 bg-white/10 p-4 text-[15px] text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400 focus:bg-white/15"
                     value={noteText}
                     onChange={(event) => setNoteText(event.target.value)}
                     placeholder="Add an internal note"
@@ -453,7 +453,7 @@ const ContactAdminPage: React.FC = () => {
                   <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <label className="flex items-center gap-2 text-sm text-slate-300">
                       <input
-                        className="h-[18px] w-[18px] cursor-pointer accent-cyan-400"
+                        className="h-4.5 w-4.5 cursor-pointer accent-cyan-400"
                         type="checkbox"
                         checked={isInternal}
                         onChange={(event) => setIsInternal(event.target.checked)}
@@ -462,7 +462,7 @@ const ContactAdminPage: React.FC = () => {
                     </label>
 
                     <button
-                      className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-6 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/30"
+                      className="rounded-xl bg-linear-to-r from-cyan-400 to-blue-500 px-6 py-3 font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-400/30"
                       onClick={handleAddNote}
                     >
                       Add note
