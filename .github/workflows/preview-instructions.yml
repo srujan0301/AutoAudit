@@ -21,10 +21,12 @@ jobs:
 
             A preview environment can be spun up on demand for this PR.
 
-            | Action | How |
-            |---|---|
-            | **Spin up preview** | Add the label `deploy-preview` to this PR |
-            | **Tear down preview** | Add the label `teardown-preview` to this PR |
+            | Action | Label | Includes |
+            |---|---|---|
+            | **Spin up preview** | `deploy-preview` | Frontend, backend, database, Redis, OPA, worker |
+            | **Spin up preview with M365** | `deploy-preview-m365` | Everything above + PowerShell service for Exchange/Teams scan testing |
+            | **Tear down preview** | `teardown-preview` | Stops the environment early |
 
             > The environment will also be torn down automatically when the PR is closed or merged.
-            > Preview URLs will appear in a follow-up comment once the deploy completes (~5 min).
+            > Preview URLs will appear in a follow-up comment once the deploy completes (~5–8 min).
+            > M365 scans require real tenant credentials added through the frontend UI.
