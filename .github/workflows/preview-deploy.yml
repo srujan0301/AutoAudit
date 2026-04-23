@@ -9,6 +9,10 @@ on:
         description: "PR number to simulate (for manual testing)"
         required: true
         default: "1"
+      m365:
+        description: "Include PowerShell service for M365 scans"
+        required: false
+        default: "false"
 
 permissions:
   contents: read
@@ -25,10 +29,12 @@ jobs:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
-       github.event.label.name == 'deploy-preview')
+       (github.event.label.name == 'deploy-preview' ||
+        github.event.label.name == 'deploy-preview-m365'))
     outputs:
       pr-number: ${{ steps.pr.outputs.number }}
       short-sha: ${{ steps.sha.outputs.short }}
+      m365: ${{ steps.pr.outputs.m365 }}
 
     steps:
       - name: Resolve PR number
@@ -36,8 +42,14 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "number=${{ github.event.number }}" >> "$GITHUB_OUTPUT"
+            if [ "${{ github.event.label.name }}" = "deploy-preview-m365" ]; then
+              echo "m365=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "m365=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "number=${{ inputs.pr_number }}" >> "$GITHUB_OUTPUT"
+            echo "m365=${{ inputs.m365 }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Resolve short SHA
@@ -49,7 +61,7 @@ jobs:
             echo "short=$(echo '${{ github.sha }}' | cut -c1-7)" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Remove deploy-preview label
+      - name: Remove triggering label
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
@@ -58,7 +70,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              name: 'deploy-preview'
+              name: context.payload.label.name,
             });
 
   # ─────────────────────────────────────────────────────────────────────────────
@@ -109,6 +121,23 @@ jobs:
           cache-from: type=gha,scope=worker
           cache-to: type=gha,mode=max,scope=worker
 
+      - name: Set lowercase PowerShell image name
+        if: needs.gate.outputs.m365 == 'true'
+        run: |
+          echo "POWERSHELL_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/powershell:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+
+      - name: Build and push PowerShell service image
+        if: needs.gate.outputs.m365 == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./engine/powershell
+          file: engine/powershell/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.POWERSHELL_IMAGE }}
+          cache-from: type=gha,scope=powershell
+          cache-to: type=gha,mode=max,scope=powershell
+
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2 — Run the full stack on the Actions runner and expose via Cloudflare
   # Quick Tunnels (trycloudflare.com, no account, no token required).
@@ -141,10 +170,18 @@ jobs:
           echo "BACKEND_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/backend:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
           echo "WORKER_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/worker:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
 
+      - name: Set lowercase PowerShell image name
+        if: needs.gate.outputs.m365 == 'true'
+        run: |
+          echo "POWERSHELL_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/powershell:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+
       - name: Pull pre-built images from GHCR
         run: |
           docker pull "$BACKEND_IMAGE"
           docker pull "$WORKER_IMAGE"
+          if [ "${{ needs.gate.outputs.m365 }}" = "true" ]; then
+            docker pull "$POWERSHELL_IMAGE"
+          fi
 
       - name: Install cloudflared
         run: |
@@ -211,6 +248,19 @@ jobs:
           echo "Waiting for OPA..."
           timeout 30 bash -c 'until curl -sf http://localhost:8181/health > /dev/null; do sleep 2; done'
 
+      - name: Start PowerShell service
+        if: needs.gate.outputs.m365 == 'true'
+        run: |
+          docker run -d \
+            --name autoaudit-powershell-service \
+            --network autoaudit_default \
+            -p 8001:8001 \
+            "$POWERSHELL_IMAGE"
+
+      - name: Wait for PowerShell service health
+        if: needs.gate.outputs.m365 == 'true'
+        run: timeout 120 bash -c 'until curl -sf http://localhost:8001/health > /dev/null; do sleep 3; done'
+
       - name: Start backend container
         run: |
           docker run -d \
@@ -260,6 +310,10 @@ jobs:
 
       - name: Start worker container
         run: |
+          PS_URL=""
+          if [ "${{ needs.gate.outputs.m365 }}" = "true" ]; then
+            PS_URL="-e POWERSHELL_SERVICE_URL=http://autoaudit-powershell-service:8001"
+          fi
           docker run -d \
             --name autoaudit-worker \
             --network autoaudit_default \
@@ -267,6 +321,7 @@ jobs:
             -e REDIS_URL=redis://redis:6379 \
             -e OPA_URL=http://opa:8181 \
             -e ENCRYPTION_KEY=Ps-HiS3ww5QzQPc_Mdu5-JyA_jCNbdFHMdiwWSlAfgM= \
+            $PS_URL \
             -v "${{ github.workspace }}/engine:/app/engine:ro" \
             -v "${{ github.workspace }}/engine/policies:/app/policies:ro" \
             "$WORKER_IMAGE"
@@ -281,6 +336,13 @@ jobs:
             const runId = '${{ github.run_id }}';
             const sha = '${{ github.sha }}'.slice(0, 7);
 
+            const m365 = '${{ needs.gate.outputs.m365 }}' === 'true';
+            const rows = [
+              `| Frontend | ${frontendUrl} |`,
+              `| Backend  | ${backendUrl} |`,
+            ];
+            if (m365) rows.push('| PowerShell | running (M365 enabled) |');
+
             const body = [
               '<!-- autoaudit-preview -->',
               `<!-- run-id: ${runId} -->`,
@@ -288,8 +350,7 @@ jobs:
               '',
               '| | URL |',
               '|---|---|',
-              `| Frontend | ${frontendUrl} |`,
-              `| Backend  | ${backendUrl} |`,
+              ...rows,
               '',
               `> Running on GitHub Actions · expires in up to 6 hours · SHA: ${sha}`,
               `> Add \`teardown-preview\` label to stop early · [Workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})`
