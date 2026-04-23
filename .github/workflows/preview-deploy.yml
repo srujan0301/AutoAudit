@@ -63,8 +63,8 @@ jobs:
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 1 — Build backend and worker images, push to GHCR
-  # Uses GitHub Actions cache (type=gha) for layer reuse — no Docker Hub token needed.
-  # Only GITHUB_TOKEN is required (packages: write permission above).
+  # Uses GitHub Actions cache (type=gha) for layer reuse so no Docker Hub token needed
+  # Only GITHUB_TOKEN is required (packages: write permission above)
   # ─────────────────────────────────────────────────────────────────────────────
   build-images:
     runs-on: ubuntu-latest
@@ -84,13 +84,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase image names
+        run: |
+          echo "BACKEND_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/backend:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+          echo "WORKER_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/worker:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: backend-api/Dockerfile
+          file: backend-api/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/backend:pr-${{ needs.gate.outputs.pr-number }}
+          tags: ${{ env.BACKEND_IMAGE }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
@@ -98,20 +103,20 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./engine
-          dockerfile: engine/Dockerfile
+          file: engine/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/worker:pr-${{ needs.gate.outputs.pr-number }}
+          tags: ${{ env.WORKER_IMAGE }}
           cache-from: type=gha,scope=worker
           cache-to: type=gha,mode=max,scope=worker
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 2 — Run the full stack on the Actions runner and expose via Cloudflare
-  # Quick Tunnels (trycloudflare.com — no account, no token required).
+  # Quick Tunnels (trycloudflare.com, no account, no token required).
   #
   # Architecture:
   #   1. Both CF tunnels start immediately (they serve 502 until origin is ready)
   #   2. Tunnel URLs are captured so the backend and frontend are configured once
-  #      with the correct public URLs — no container restarts needed
+  #      with the correct public URLs, no container restarts needed
   #   3. The job sleeps (keeping everything alive) until cancelled by teardown
   #      or the 6-hour GitHub Actions job timeout is reached
   # ─────────────────────────────────────────────────────────────────────────────
@@ -131,10 +136,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase image names
+        run: |
+          echo "BACKEND_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/backend:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+          echo "WORKER_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/worker:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+
       - name: Pull pre-built images from GHCR
         run: |
-          docker pull ghcr.io/${{ github.repository }}/backend:pr-${{ needs.gate.outputs.pr-number }}
-          docker pull ghcr.io/${{ github.repository }}/worker:pr-${{ needs.gate.outputs.pr-number }}
+          docker pull "$BACKEND_IMAGE"
+          docker pull "$WORKER_IMAGE"
 
       - name: Install cloudflared
         run: |
@@ -216,7 +226,7 @@ jobs:
             -e BACKEND_PUBLIC_URL="${{ steps.tunnels.outputs.backend-url }}" \
             -e FRONTEND_URL="${{ steps.tunnels.outputs.frontend-url }}" \
             -v "${{ github.workspace }}/engine/policies:/app/policies:ro" \
-            ghcr.io/${{ github.repository }}/backend:pr-${{ needs.gate.outputs.pr-number }}
+            "$BACKEND_IMAGE"
 
       - name: Wait for backend health (includes Alembic migrations)
         run: |
@@ -259,7 +269,7 @@ jobs:
             -e ENCRYPTION_KEY=Ps-HiS3ww5QzQPc_Mdu5-JyA_jCNbdFHMdiwWSlAfgM= \
             -v "${{ github.workspace }}/engine:/app/engine:ro" \
             -v "${{ github.workspace }}/engine/policies:/app/policies:ro" \
-            ghcr.io/${{ github.repository }}/worker:pr-${{ needs.gate.outputs.pr-number }}
+            "$WORKER_IMAGE"
 
       - name: Post or update PR comment
         uses: actions/github-script@v7
