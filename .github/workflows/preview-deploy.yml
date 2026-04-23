@@ -14,11 +14,11 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  packages: write
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # Job 0 — Gate: validate trigger, resolve PR number, remove consumed label
-  # Triggered by adding the "deploy-preview" label to the PR.
   # ─────────────────────────────────────────────────────────────────────────────
   gate:
     runs-on: ubuntu-latest
@@ -62,20 +62,172 @@ jobs:
             });
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # Job 1 — Build & deploy frontend to Netlify
-  # Runs after deploy-backend-preview so VITE_API_URL can be set to the real
-  # Cloud Run URL (which isn't known until after the first backend deploy).
+  # Job 1 — Build backend and worker images, push to GHCR
+  # Uses GitHub Actions cache (type=gha) for layer reuse — no Docker Hub token needed.
+  # Only GITHUB_TOKEN is required (packages: write permission above).
   # ─────────────────────────────────────────────────────────────────────────────
-  build-frontend:
+  build-images:
     runs-on: ubuntu-latest
-    needs: [gate, deploy-backend-preview]
-    outputs:
-      netlify-url: ${{ steps.deploy.outputs.deploy-url }}
-      pr-number: ${{ needs.gate.outputs.pr-number }}
+    needs: gate
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          dockerfile: backend-api/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/backend:pr-${{ needs.gate.outputs.pr-number }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./engine
+          dockerfile: engine/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/worker:pr-${{ needs.gate.outputs.pr-number }}
+          cache-from: type=gha,scope=worker
+          cache-to: type=gha,mode=max,scope=worker
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2 — Run the full stack on the Actions runner and expose via Cloudflare
+  # Quick Tunnels (trycloudflare.com — no account, no token required).
+  #
+  # Architecture:
+  #   1. Both CF tunnels start immediately (they serve 502 until origin is ready)
+  #   2. Tunnel URLs are captured so the backend and frontend are configured once
+  #      with the correct public URLs — no container restarts needed
+  #   3. The job sleeps (keeping everything alive) until cancelled by teardown
+  #      or the 6-hour GitHub Actions job timeout is reached
+  # ─────────────────────────────────────────────────────────────────────────────
+  run-preview:
+    runs-on: ubuntu-latest
+    needs: [gate, build-images]
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull pre-built images from GHCR
+        run: |
+          docker pull ghcr.io/${{ github.repository }}/backend:pr-${{ needs.gate.outputs.pr-number }}
+          docker pull ghcr.io/${{ github.repository }}/worker:pr-${{ needs.gate.outputs.pr-number }}
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL \
+            https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb \
+            -o /tmp/cloudflared.deb
+          sudo dpkg -i /tmp/cloudflared.deb
+
+      - name: Start Cloudflare Quick Tunnels and capture URLs
+        id: tunnels
+        run: |
+          # Start both tunnels immediately — CF generates URLs before the origin is up,
+          # so we can configure the backend and frontend correctly from the first start.
+          cloudflared tunnel --url http://localhost:8000 \
+            --logfile /tmp/cf-backend.log \
+            --no-autoupdate 2>/dev/null &
+
+          cloudflared tunnel --url http://localhost:3000 \
+            --logfile /tmp/cf-frontend.log \
+            --no-autoupdate 2>/dev/null &
+
+          BACKEND_URL=""
+          FRONTEND_URL=""
+          for i in $(seq 1 30); do
+            sleep 2
+            if [ -z "$BACKEND_URL" ]; then
+              BACKEND_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cf-backend.log 2>/dev/null | head -1 || true)
+            fi
+            if [ -z "$FRONTEND_URL" ]; then
+              FRONTEND_URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cf-frontend.log 2>/dev/null | head -1 || true)
+            fi
+            if [ -n "$BACKEND_URL" ] && [ -n "$FRONTEND_URL" ]; then
+              break
+            fi
+          done
+
+          if [ -z "$BACKEND_URL" ]; then
+            echo "ERROR: Could not get backend tunnel URL"
+            cat /tmp/cf-backend.log
+            exit 1
+          fi
+          if [ -z "$FRONTEND_URL" ]; then
+            echo "ERROR: Could not get frontend tunnel URL"
+            cat /tmp/cf-frontend.log
+            exit 1
+          fi
+
+          echo "Backend tunnel:  $BACKEND_URL"
+          echo "Frontend tunnel: $FRONTEND_URL"
+          echo "backend-url=$BACKEND_URL" >> "$GITHUB_OUTPUT"
+          echo "frontend-url=$FRONTEND_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Start infrastructure services
+        run: COMPOSE_PROJECT_NAME=autoaudit docker compose up -d db redis opa
+
+      - name: Wait for infrastructure healthchecks
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 60 bash -c 'until docker exec autoaudit-db pg_isready -U autoaudit; do sleep 2; done'
+
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until docker exec autoaudit-redis redis-cli ping | grep -q PONG; do sleep 2; done'
+
+          echo "Waiting for OPA..."
+          timeout 30 bash -c 'until curl -sf http://localhost:8181/health > /dev/null; do sleep 2; done'
+
+      - name: Start backend container
+        run: |
+          docker run -d \
+            --name autoaudit-backend-api \
+            --network autoaudit_default \
+            -p 8000:8000 \
+            -e APP_ENV=preview \
+            -e DATABASE_URL=postgresql+asyncpg://autoaudit:autoaudit_dev_password@db:5432/autoaudit \
+            -e SECRET_KEY=preview-ephemeral-key-not-sensitive \
+            -e ENCRYPTION_KEY=Ps-HiS3ww5QzQPc_Mdu5-JyA_jCNbdFHMdiwWSlAfgM= \
+            -e REDIS_URL=redis://redis:6379 \
+            -e OPA_URL=http://opa:8181 \
+            -e BACKEND_PUBLIC_URL="${{ steps.tunnels.outputs.backend-url }}" \
+            -e FRONTEND_URL="${{ steps.tunnels.outputs.frontend-url }}" \
+            -v "${{ github.workspace }}/engine/policies:/app/policies:ro" \
+            ghcr.io/${{ github.repository }}/backend:pr-${{ needs.gate.outputs.pr-number }}
+
+      - name: Wait for backend health (includes Alembic migrations)
+        run: |
+          echo "Waiting for backend API to be ready..."
+          timeout 120 bash -c '
+            until curl -sf http://localhost:8000/health > /dev/null 2>&1 || \
+                  curl -sf http://localhost:8000/ > /dev/null 2>&1; do
+              sleep 3
+            done
+          '
+          echo "Backend is ready."
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -84,223 +236,89 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
-
       - name: Build frontend
         working-directory: frontend
-        env:
-          VITE_API_URL: ${{ needs.deploy-backend-preview.outputs.backend-url }}
-        run: npm run build
-
-      - name: Deploy to Netlify
-        id: deploy
-        uses: nwtgck/actions-netlify@v3
-        with:
-          publish-dir: frontend/dist
-          production-deploy: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "PR #${{ needs.gate.outputs.pr-number }} — preview deploy"
-          alias: pr-${{ needs.gate.outputs.pr-number }}
-          enable-pull-request-comment: false
-          enable-commit-comment: false
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.PREVIEW_NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.PREVIEW_NETLIFY_SITE_ID }}
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Job 2 — Build & push backend image to Docker Hub (parallel with job 1)
-  # ─────────────────────────────────────────────────────────────────────────────
-  build-push-backend-image:
-    runs-on: ubuntu-latest
-    needs: gate
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.PREVIEW_DOCKER_HUB_TOKEN }}
-
-      - name: Build & push backend image
         run: |
-          PR_NUM=${{ needs.gate.outputs.pr-number }}
-          SHA=${{ needs.gate.outputs.short-sha }}
-          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${PR_NUM}-${SHA}"
-          docker build \
-            -f backend-api/Dockerfile \
-            -t "$IMAGE" \
-            .
-          docker push "$IMAGE"
+          npm ci
+          VITE_API_URL="${{ steps.tunnels.outputs.backend-url }}" npm run build
 
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Job 3 — Deploy backend to Cloud Run with Neon DB branch (needs job 2)
-  # ─────────────────────────────────────────────────────────────────────────────
-  deploy-backend-preview:
-    runs-on: ubuntu-latest
-    needs: [gate, build-push-backend-image]
-    outputs:
-      backend-url: ${{ steps.deploy.outputs.backend-url }}
-
-    steps:
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.PREVIEW_GCP_CREDENTIALS }}
-
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: Create or reuse Neon DB branch
-        id: neon
-        env:
-          NEON_API_KEY: ${{ secrets.PREVIEW_NEON_API_KEY }}
-          NEON_PROJECT_ID: ${{ secrets.PREVIEW_NEON_PROJECT_ID }}
+      - name: Serve frontend static files
+        working-directory: frontend
         run: |
-          BRANCH_NAME="pr-${{ needs.gate.outputs.pr-number }}"
+          npx serve -s dist -l 3000 &
+          sleep 3
 
-          EXISTING=$(curl -s \
-            -H "Authorization: Bearer ${NEON_API_KEY}" \
-            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches" \
-          | jq -r --arg name "$BRANCH_NAME" '.branches[] | select(.name == $name) | .id')
-
-          if [ -n "$EXISTING" ]; then
-            echo "Reusing existing Neon branch: ${EXISTING}"
-            BRANCH_ID="$EXISTING"
-          else
-            RESPONSE=$(curl -s -X POST \
-              -H "Authorization: Bearer ${NEON_API_KEY}" \
-              -H "Content-Type: application/json" \
-              -d "{\"branch\": {\"name\": \"${BRANCH_NAME}\"}, \"endpoints\": [{\"type\": \"read_write\"}]}" \
-              "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches")
-            BRANCH_ID=$(echo "$RESPONSE" | jq -r '.branch.id')
-            echo "Created Neon branch: ${BRANCH_ID}"
-          fi
-
-          if [ -z "$BRANCH_ID" ] || [ "$BRANCH_ID" = "null" ]; then
-            echo "ERROR: Failed to get or create Neon branch (BRANCH_ID=${BRANCH_ID})"
-            exit 1
-          fi
-
-          # Ensure a read_write compute endpoint exists for the branch (may be missing on reused branches)
-          ENDPOINT_ID=$(curl -s \
-            -H "Authorization: Bearer ${NEON_API_KEY}" \
-            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/endpoints" \
-          | jq -r --arg bid "$BRANCH_ID" '.endpoints[] | select(.branch_id == $bid and .type == "read_write") | .id' | head -1)
-
-          if [ -z "$ENDPOINT_ID" ] || [ "$ENDPOINT_ID" = "null" ]; then
-            echo "No compute endpoint found for branch ${BRANCH_ID}, creating one..."
-            EP_RESPONSE=$(curl -s -X POST \
-              -H "Authorization: Bearer ${NEON_API_KEY}" \
-              -H "Content-Type: application/json" \
-              -d "{\"endpoint\": {\"branch_id\": \"${BRANCH_ID}\", \"type\": \"read_write\"}}" \
-              "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/endpoints")
-            ENDPOINT_ID=$(echo "$EP_RESPONSE" | jq -r '.endpoint.id')
-            if [ -z "$ENDPOINT_ID" ] || [ "$ENDPOINT_ID" = "null" ]; then
-              echo "ERROR: Failed to create endpoint (response: ${EP_RESPONSE})"
-              exit 1
-            fi
-            echo "Created endpoint: ${ENDPOINT_ID}"
-          else
-            echo "Found existing endpoint: ${ENDPOINT_ID}"
-          fi
-
-          # pooled=false → direct connection (no PgBouncer); asyncpg is incompatible with
-          # Neon's pooler because it uses extended query protocol features PgBouncer blocks.
-          CONN=$(curl -s \
-            -H "Authorization: Bearer ${NEON_API_KEY}" \
-            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/connection_uri?branch_id=${BRANCH_ID}&database_name=neondb&role_name=neondb_owner&pooled=false")
-          DB_URL=$(echo "$CONN" | jq -r '.uri')
-
-          if [ -z "$DB_URL" ] || [ "$DB_URL" = "null" ]; then
-            echo "ERROR: Failed to get Neon connection URI (response: ${CONN})"
-            exit 1
-          fi
-
-          # Strip all query params from the Neon URL (channel_binding and sslmode are libpq-only
-          # and not handled by all SQLAlchemy 2.0.x asyncpg dialect versions).
-          # Use ssl=require — SQLAlchemy's asyncpg dialect explicitly converts "require" → True
-          # before passing to asyncpg.connect(), so asyncpg receives ssl=True (a valid value).
-          BASE_URL="${DB_URL%%\?*}"
-          ASYNCPG_URL="${BASE_URL/postgresql:\/\//postgresql+asyncpg:\/\/}?ssl=require"
-
-          echo "database-url=${ASYNCPG_URL}" >> "$GITHUB_OUTPUT"
-
-      - name: Deploy to Cloud Run
-        id: deploy
-        env:
-          GCP_PROJECT_ID: ${{ secrets.PREVIEW_GCP_PROJECT_ID }}
-          SECRET_KEY: ${{ secrets.PREVIEW_SECRET_KEY }}
-          ENCRYPTION_KEY: ${{ secrets.PREVIEW_ENCRYPTION_KEY }}
-          REDIS_URL: ${{ secrets.PREVIEW_UPSTASH_REDIS_URL }}
-          DATABASE_URL: ${{ steps.neon.outputs.database-url }}
-          FRONTEND_URL: "https://pr-${{ needs.gate.outputs.pr-number }}--${{ vars.NETLIFY_SITE_NAME }}.netlify.app"
+      - name: Start worker container
         run: |
-          SERVICE="autoaudit-pr-${{ needs.gate.outputs.pr-number }}"
-          IMAGE="docker.io/${{ secrets.PREVIEW_DOCKER_HUB_USERNAME }}/autoaudit-backend:pr-${{ needs.gate.outputs.pr-number }}-${{ needs.gate.outputs.short-sha }}"
-          REGION="us-central1"
+          docker run -d \
+            --name autoaudit-worker \
+            --network autoaudit_default \
+            -e DATABASE_URL=postgresql+asyncpg://autoaudit:autoaudit_dev_password@db:5432/autoaudit \
+            -e REDIS_URL=redis://redis:6379 \
+            -e OPA_URL=http://opa:8181 \
+            -e ENCRYPTION_KEY=Ps-HiS3ww5QzQPc_Mdu5-JyA_jCNbdFHMdiwWSlAfgM= \
+            -v "${{ github.workspace }}/engine:/app/engine:ro" \
+            -v "${{ github.workspace }}/engine/policies:/app/policies:ro" \
+            ghcr.io/${{ github.repository }}/worker:pr-${{ needs.gate.outputs.pr-number }}
 
-          gcloud run deploy "$SERVICE" \
-            --image "$IMAGE" \
-            --region "$REGION" \
-            --platform managed \
-            --allow-unauthenticated \
-            --port 8000 \
-            --min-instances 0 \
-            --max-instances 3 \
-            --memory 512Mi \
-            --cpu-boost \
-            --set-env-vars "APP_ENV=preview,OPA_URL=http://localhost:8181,SECRET_KEY=${SECRET_KEY},ENCRYPTION_KEY=${ENCRYPTION_KEY},DATABASE_URL=${DATABASE_URL},REDIS_URL=${REDIS_URL},FRONTEND_URL=${FRONTEND_URL}" \
-            --project "$GCP_PROJECT_ID"
-
-          # Cloud Run URLs contain a project hash — discover after first deploy
-          URL=$(gcloud run services describe "$SERVICE" \
-            --region "$REGION" \
-            --format 'value(status.url)' \
-            --project "$GCP_PROJECT_ID")
-
-          # Patch BACKEND_PUBLIC_URL now that the URL is known (used for OAuth redirects)
-          gcloud run services update "$SERVICE" \
-            --region "$REGION" \
-            --update-env-vars "BACKEND_PUBLIC_URL=${URL}" \
-            --project "$GCP_PROJECT_ID"
-
-          echo "backend-url=${URL}" >> "$GITHUB_OUTPUT"
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Job 4 — Post / update PR comment with preview URLs
-  # ─────────────────────────────────────────────────────────────────────────────
-  post-preview-comment:
-    runs-on: ubuntu-latest
-    needs: [build-frontend, deploy-backend-preview]
-    if: always() && needs.build-frontend.result == 'success'
-
-    steps:
-      - name: Find existing preview comment
-        id: find-comment
-        uses: peter-evans/find-comment@v3
+      - name: Post or update PR comment
+        uses: actions/github-script@v7
         with:
-          issue-number: ${{ needs.build-frontend.outputs.pr-number }}
-          comment-author: github-actions[bot]
-          body-includes: "<!-- autoaudit-preview -->"
+          script: |
+            const prNumber = parseInt('${{ needs.gate.outputs.pr-number }}');
+            const backendUrl = '${{ steps.tunnels.outputs.backend-url }}';
+            const frontendUrl = '${{ steps.tunnels.outputs.frontend-url }}';
+            const runId = '${{ github.run_id }}';
+            const sha = '${{ github.sha }}'.slice(0, 7);
 
-      - name: Create or update preview comment
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ needs.build-frontend.outputs.pr-number }}
-          edit-mode: replace
-          body: |
-            <!-- autoaudit-preview -->
-            ## Preview Environment
+            const body = [
+              '<!-- autoaudit-preview -->',
+              `<!-- run-id: ${runId} -->`,
+              '## Preview Environment',
+              '',
+              '| | URL |',
+              '|---|---|',
+              `| Frontend | ${frontendUrl} |`,
+              `| Backend  | ${backendUrl} |`,
+              '',
+              `> Running on GitHub Actions · expires in up to 6 hours · SHA: ${sha}`,
+              `> Add \`teardown-preview\` label to stop early · [Workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})`
+            ].join('\n');
 
-            | | URL | Status |
-            |---|---|---|
-            | Frontend | ${{ needs.build-frontend.outputs.netlify-url }} | ${{ needs.build-frontend.result }} |
-            | Backend | ${{ needs.deploy-backend-preview.outputs.backend-url }} | ${{ needs.deploy-backend-preview.result }} |
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
 
-            > Last updated: ${{ github.sha }} · [Workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            const existing = comments.data.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('<!-- autoaudit-preview -->')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+      - name: Keep-alive (preview stays up until cancelled or 6h timeout)
+        run: |
+          echo "Preview is live."
+          echo "  Frontend: ${{ steps.tunnels.outputs.frontend-url }}"
+          echo "  Backend:  ${{ steps.tunnels.outputs.backend-url }}"
+          echo "Sleeping until cancelled by teardown workflow or 6-hour timeout..."
+          for i in $(seq 1 360); do
+            sleep 60
+          done
+          echo "6-hour timeout reached. Preview shutting down."
