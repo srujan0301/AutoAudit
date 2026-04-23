@@ -169,6 +169,7 @@ jobs:
         run: |
           echo "BACKEND_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/backend:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
           echo "WORKER_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/worker:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
+          echo "PREVIEW_ENC_KEY=${{ secrets.PREVIEW_ENCRYPTION_KEY }}" >> "$GITHUB_ENV"
 
       - name: Set lowercase PowerShell image name
         if: needs.gate.outputs.m365 == 'true'
@@ -270,7 +271,7 @@ jobs:
             -e APP_ENV=preview \
             -e DATABASE_URL=postgresql+asyncpg://autoaudit:autoaudit_dev_password@db:5432/autoaudit \
             -e SECRET_KEY=preview-ephemeral-key-not-sensitive \
-            -e ENCRYPTION_KEY=Ps-HiS3ww5QzQPc_Mdu5-JyA_jCNbdFHMdiwWSlAfgM= \
+            -e ENCRYPTION_KEY="$PREVIEW_ENC_KEY" \
             -e REDIS_URL=redis://redis:6379 \
             -e OPA_URL=http://opa:8181 \
             -e BACKEND_PUBLIC_URL="${{ steps.tunnels.outputs.backend-url }}" \
@@ -320,7 +321,7 @@ jobs:
             -e DATABASE_URL=postgresql+asyncpg://autoaudit:autoaudit_dev_password@db:5432/autoaudit \
             -e REDIS_URL=redis://redis:6379 \
             -e OPA_URL=http://opa:8181 \
-            -e ENCRYPTION_KEY=Ps-HiS3ww5QzQPc_Mdu5-JyA_jCNbdFHMdiwWSlAfgM= \
+            -e ENCRYPTION_KEY="$PREVIEW_ENC_KEY" \
             $PS_URL \
             -v "${{ github.workspace }}/engine:/app/engine:ro" \
             -v "${{ github.workspace }}/engine/policies:/app/policies:ro" \
