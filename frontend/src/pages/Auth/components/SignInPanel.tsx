@@ -193,6 +193,7 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
 
           <button
             type="submit"
+            data-testid="form-sign-in"
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#3b82f6_0%,#2563eb_100%)] px-4 py-4 text-[1rem] font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
             disabled={isLoading}
           >

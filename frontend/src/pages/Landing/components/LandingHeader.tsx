@@ -65,6 +65,7 @@ const LandingHeader = ({
         {showSignIn && (
           <button
             type="button"
+            data-testid="sign-in-header"
             onClick={onSignInClick}
             className="rounded-full bg-linear-to-br from-brand-blue to-brand-blue-deep px-5 py-2.5 text-sm font-semibold text-text-strong transition duration-200 hover:-translate-y-0.5 hover:from-brand-cyan hover:to-brand-blue hover:shadow-[0_10px_25px_rgb(var(--brand-blue)/0.35)]"
           >

@@ -390,6 +390,7 @@ const SignupFormPanel = ({
           Already have an account?{" "}
           <button
             type="button"
+            data-testid="back-sign-in"
             onClick={onBackToLogin}
             className="border-none bg-transparent font-semibold text-brand-blue"
           >
