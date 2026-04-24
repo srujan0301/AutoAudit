@@ -186,10 +186,10 @@ const SignupFormPanel = ({
 
   return (
     <section
-      className="flex items-stretch justify-center rounded-[24px]"
+      className="flex items-stretch justify-center rounded-3xl"
       aria-labelledby="signup-form-heading"
     >
-      <div className="h-full w-full max-w-[480px] rounded-[18px] bg-[rgba(15,35,56,0.9)] p-9 shadow-[0_30px_60px_rgba(5,9,20,0.45)]">
+      <div className="h-full w-full max-w-120 rounded-[18px] bg-[rgba(15,35,56,0.9)] p-9 shadow-[0_30px_60px_rgba(5,9,20,0.45)]">
         <header className="mb-8">
           <h2 id="signup-form-heading" className="mb-2 text-[2rem] leading-tight text-white">
             Create Account
@@ -216,7 +216,7 @@ const SignupFormPanel = ({
                     onChange={handleChange}
                     placeholder={field.placeholder}
                     required
-                    className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
+                    className="w-full rounded-xl border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
                   />
                 </div>
               </label>
@@ -240,7 +240,7 @@ const SignupFormPanel = ({
                   onChange={handleChange}
                   placeholder={field.placeholder}
                   required
-                  className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
+                  className="w-full rounded-xl border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
                 />
               </div>
             </label>
@@ -262,7 +262,7 @@ const SignupFormPanel = ({
                 onChange={handleChange}
                 placeholder="Create a strong password"
                 required
-                className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
+                className="w-full rounded-xl border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
               />
               <button
                 type="button"
@@ -306,7 +306,7 @@ const SignupFormPanel = ({
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 required
-                className="w-full rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
+                className="w-full rounded-xl border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[#6c7a8d] focus:border-[#3b82f6] focus:bg-[rgba(255,255,255,0.08)] focus:shadow-[0_0_0_4px_rgba(59,130,246,0.12)]"
               />
               <button
                 type="button"
@@ -324,7 +324,7 @@ const SignupFormPanel = ({
               type="checkbox"
               checked={agreeTerms}
               onChange={handleAgreeTermsChange}
-              className="mt-[2px] h-[18px] w-[18px] accent-[#3b82f6]"
+              className="mt-0.5 h-4.5 w-4.5 accent-[#3b82f6]"
             />
             <span>
               I agree to the{" "}
@@ -340,7 +340,7 @@ const SignupFormPanel = ({
 
           {(error || submitError) && (
             <p
-              className="rounded-[6px] border border-[rgba(255,80,80,0.3)] bg-[rgba(255,80,80,0.08)] px-[10px] py-2 text-[13px] text-[#ff6b6b]"
+              className="rounded-md border border-[rgba(255,80,80,0.3)] bg-[rgba(255,80,80,0.08)] px-2.5 py-2 text-[13px] text-[#ff6b6b]"
               role="alert"
             >
               {error || submitError}
@@ -349,7 +349,7 @@ const SignupFormPanel = ({
 
           <button
             type="submit"
-            className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(135deg,#3b82f6_0%,#2563eb_100%)] px-4 py-4 text-[1rem] font-semibold text-white transition hover:-translate-y-[2px] hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#3b82f6_0%,#2563eb_100%)] px-4 py-4 text-[1rem] font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(59,130,246,0.4)]"
           >
             <span>Create Account</span>
             <ArrowRight size={18} />
@@ -369,7 +369,7 @@ const SignupFormPanel = ({
             <button
               key={button.label}
               type="button"
-              className="flex w-full max-w-[280px] items-center justify-center gap-2 rounded-[12px] border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.04)] px-4 py-[0.9rem] font-semibold text-white transition hover:-translate-y-[2px] hover:border-[#3b82f6]"
+              className="flex w-full max-w-70 items-center justify-center gap-2 rounded-xl border-2 border-[rgba(59,130,246,0.2)] bg-[rgba(255,255,255,0.04)] px-4 py-[0.9rem] font-semibold text-white transition hover:-translate-y-0.5 hover:border-[#3b82f6]"
               onClick={() => handleSocialSignUp(button.provider)}
               disabled={Boolean(button.disabled)}
               aria-disabled={button.disabled ? "true" : "false"}

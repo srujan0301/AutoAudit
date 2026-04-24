@@ -35,7 +35,7 @@ const LandingHeader = ({
             src="/AutoAudit.png"
             alt="AutoAudit"
             loading="lazy"
-            className="block h-[70px] w-auto transition-transform duration-200 hover:scale-[1.03]"
+            className="block h-17.5 w-auto transition-transform duration-200 hover:scale-[1.03]"
           />
         </picture>
       </Link>
@@ -66,7 +66,7 @@ const LandingHeader = ({
           <button
             type="button"
             onClick={onSignInClick}
-            className="rounded-full bg-gradient-to-br from-[#3b82f6] to-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:from-[#22d3ee] hover:to-[#3b82f6] hover:shadow-[0_10px_25px_rgba(59,130,246,0.35)]"
+            className="rounded-full bg-linear-to-br from-[#3b82f6] to-[#2563eb] px-5 py-2.5 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:from-[#22d3ee] hover:to-[#3b82f6] hover:shadow-[0_10px_25px_rgba(59,130,246,0.35)]"
           >
             Sign In
           </button>

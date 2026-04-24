@@ -76,7 +76,7 @@ export default function SettingsPage({ sidebarWidth = 220, isDarkMode = true }: 
         transition: "margin-left 0.4s ease, width 0.4s ease",
       }}
     >
-      <div className="mx-auto flex max-w-[1000px] flex-col gap-6">
+      <div className="mx-auto flex max-w-250 flex-col gap-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 text-text-strong">
             <Settings size={24} className="shrink-0 text-[rgb(var(--accent-teal))]" aria-hidden />
@@ -112,7 +112,7 @@ export default function SettingsPage({ sidebarWidth = 220, isDarkMode = true }: 
                 </div>
               </div>
               <label
-                className="relative inline-block h-[26px] w-[50px] shrink-0 cursor-pointer has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50"
+                className="relative inline-block h-6.5 w-12.5 shrink-0 cursor-pointer has-disabled:cursor-not-allowed has-disabled:opacity-50"
                 aria-label="Confirm before delete"
               >
                 <input
@@ -127,7 +127,7 @@ export default function SettingsPage({ sidebarWidth = 220, isDarkMode = true }: 
                   aria-hidden
                 />
                 <span
-                  className="absolute left-[3px] top-[3px] h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-[24px]"
+                  className="absolute left-0.75 top-0.75 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-6"
                   aria-hidden
                 />
               </label>

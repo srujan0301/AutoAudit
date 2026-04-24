@@ -87,6 +87,10 @@
     outline-offset: 2px;
   }
 
+  button {
+    @apply cursor-pointer;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     * {
       animation-duration: 0.01ms !important;
