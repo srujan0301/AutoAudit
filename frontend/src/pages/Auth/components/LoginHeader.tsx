@@ -16,17 +16,17 @@ const LoginHeader = () => {
         <img
           src="/AutoAudit.png"
           alt="AutoAudit"
-          className="h-17.5 w-auto transition-transform duration-300 hover:scale-[1.04]"
+          className="w-auto transition-transform duration-300 h-17.5 hover:scale-[1.04]"
         />
       </Link>
 
-      <nav className="flex items-center gap-6" aria-label="Primary navigation">
+      <nav className="flex gap-6 items-center" aria-label="Primary navigation">
         {navLinks.map((link) =>
           link.href.startsWith("/") ? (
             <Link
               key={link.label}
               to={link.href}
-              className="relative font-medium text-[rgb(224_224_224)] transition-colors duration-300 hover:text-blue-500"
+              className="relative font-medium transition-colors duration-300 hover:text-blue-500 text-[rgb(224_224_224)]"
             >
               {link.label}
             </Link>
@@ -34,7 +34,7 @@ const LoginHeader = () => {
             <a
               key={link.label}
               href={link.href}
-              className="relative font-medium text-[rgb(224_224_224)] transition-colors duration-300 hover:text-blue-500"
+              className="relative font-medium transition-colors duration-300 hover:text-blue-500 text-[rgb(224_224_224)]"
             >
               {link.label}
             </a>

@@ -64,13 +64,13 @@ const ContactForm: React.FC<ContactFormProps> = ({ submitted, onSubmit }) => {
   };
 
   return (
-    <div className="rounded-[20px] border border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.03)] p-8 backdrop-blur-[10px] md:p-12">
+    <div className="p-8 border md:p-12 rounded-[20px] border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.03)] backdrop-blur-[10px]">
       <h2 className="mb-6 text-2xl font-semibold text-white">
         Send us a Message
       </h2>
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 mb-6 md:grid-cols-2">
           <div>
             <label htmlFor="firstName" className={labelClassName}>
               First Name *
@@ -98,7 +98,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ submitted, onSubmit }) => {
           </div>
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 mb-6 md:grid-cols-2">
           <div>
             <label htmlFor="email" className={labelClassName}>
               Email Address *
@@ -178,19 +178,19 @@ const ContactForm: React.FC<ContactFormProps> = ({ submitted, onSubmit }) => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 w-full rounded-full bg-gradient-to-br from-[rgb(var(--brand-blue))] to-[rgb(var(--brand-blue-deep))] px-6 py-3 text-lg font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_25px_rgb(var(--brand-blue)/0.35)] disabled:cursor-not-allowed disabled:opacity-70"
+          className="py-3 px-6 mt-2 w-full text-lg font-semibold text-white bg-gradient-to-br rounded-full transition duration-200 hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed from-[rgb(var(--brand-blue))] to-[rgb(var(--brand-blue-deep))] hover:shadow-[0_10px_25px_rgb(var(--brand-blue)/0.35)]"
         >
           {isSubmitting ? "Sending..." : "Send Message"}
         </button>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-[rgb(var(--accent-bad)/0.4)] bg-[rgb(var(--accent-bad)/0.12)] px-4 py-3 text-center text-[rgb(254_202_202)]">
+          <div className="py-3 px-4 mt-4 text-center rounded-xl border border-[rgb(var(--accent-bad)/0.4)] bg-[rgb(var(--accent-bad)/0.12)] text-[rgb(254_202_202)]">
             {error}
           </div>
         )}
 
         {submitted && (
-          <div className="mt-4 rounded-xl border border-[rgb(var(--brand-blue))] bg-[rgb(var(--brand-blue)/0.12)] px-4 py-4 text-center text-[rgb(var(--brand-blue))]">
+          <div className="py-4 px-4 mt-4 text-center rounded-xl border border-[rgb(var(--brand-blue))] bg-[rgb(var(--brand-blue)/0.12)] text-[rgb(var(--brand-blue))]">
             ✓ Thank you! Your message has been sent successfully. We&apos;ll get
             back to you soon.
           </div>

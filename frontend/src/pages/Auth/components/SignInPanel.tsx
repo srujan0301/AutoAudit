@@ -109,25 +109,25 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
   };
 
   return (
-    <section className="flex items-stretch justify-center rounded-3xl">
-      <div className="h-full w-full max-w-120 rounded-[18px] bg-[rgb(15_35_56/0.9)] p-9 shadow-[0_30px_60px_rgb(5_9_20/0.45)]">
+    <section className="flex justify-center items-stretch rounded-3xl">
+      <div className="p-9 w-full h-full max-w-120 rounded-[18px] bg-[rgb(15_35_56/0.9)] shadow-[0_30px_60px_rgb(5_9_20/0.45)]">
         <div>
-          <h2 className="mb-2 text-[2rem] leading-tight text-white">Welcome Back</h2>
+          <h2 className="mb-2 leading-tight text-white text-[2rem]">Welcome Back</h2>
           <p className="text-[rgb(var(--landing-text-soft))]">
             Sign in to access your compliance dashboard and security reports.
           </p>
         </div>
 
-        <form className="mt-8 flex flex-col gap-5" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-5 mt-8" onSubmit={handleSubmit}>
           {error && (
-            <div className="mb-4 flex items-center gap-2 rounded-lg border border-[rgb(var(--accent-bad)/0.3)] bg-[rgb(var(--accent-bad)/0.1)] px-3 py-3 text-[rgb(var(--accent-bad))]">
+            <div className="flex gap-2 items-center py-3 px-3 mb-4 rounded-lg border border-[rgb(var(--accent-bad)/0.3)] bg-[rgb(var(--accent-bad)/0.1)] text-[rgb(var(--accent-bad))]">
               <AlertCircle size={18} />
               <span>{error}</span>
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="mb-[0.4rem] block font-medium text-[rgb(var(--landing-text-soft))]">
+            <label htmlFor="email" className="block font-medium mb-[0.4rem] text-[rgb(var(--landing-text-soft))]">
               Email Address
             </label>
             <div className="relative">
@@ -141,13 +141,13 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
-                className="w-full rounded-xl border-2 border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(255_255_255/0.05)] px-4 py-4 pl-12 text-[1rem] text-white outline-none transition placeholder:text-[rgb(108_122_141)] focus:border-[rgb(var(--brand-blue))] focus:bg-[rgb(255_255_255/0.08)] focus:shadow-[0_0_0_4px_rgb(var(--brand-blue)/0.12)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="py-4 px-4 pl-12 w-full text-white rounded-xl border-2 transition outline-none disabled:opacity-60 disabled:cursor-not-allowed border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(255_255_255/0.05)] text-[1rem] placeholder:text-[rgb(108_122_141)] focus:border-[rgb(var(--brand-blue))] focus:bg-[rgb(255_255_255/0.08)] focus:shadow-[0_0_0_4px_rgb(var(--brand-blue)/0.12)]"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-[0.4rem] block font-medium text-[rgb(var(--landing-text-soft))]">
+            <label htmlFor="password" className="block font-medium mb-[0.4rem] text-[rgb(var(--landing-text-soft))]">
               Password
             </label>
             <div className="relative">
@@ -161,11 +161,11 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
                 onChange={handleChange}
                 required
                 disabled={isLoading}
-                className="w-full rounded-xl border-2 border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(255_255_255/0.05)] px-4 py-4 pl-12 pr-12 text-[1rem] text-white outline-none transition placeholder:text-[rgb(108_122_141)] focus:border-[rgb(var(--brand-blue))] focus:bg-[rgb(255_255_255/0.08)] focus:shadow-[0_0_0_4px_rgb(var(--brand-blue)/0.12)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="py-4 px-4 pr-12 pl-12 w-full text-white rounded-xl border-2 transition outline-none disabled:opacity-60 disabled:cursor-not-allowed border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(255_255_255/0.05)] text-[1rem] placeholder:text-[rgb(108_122_141)] focus:border-[rgb(var(--brand-blue))] focus:bg-[rgb(255_255_255/0.08)] focus:shadow-[0_0_0_4px_rgb(var(--brand-blue)/0.12)]"
               />
               <button
                 type="button"
-                className="absolute right-4 top-1/2 -translate-y-1/2 border-none bg-transparent text-[rgb(var(--landing-text-soft))] transition hover:text-[rgb(var(--brand-blue))] disabled:cursor-not-allowed disabled:opacity-60"
+                className="absolute right-4 top-1/2 bg-transparent border-none transition -translate-y-1/2 disabled:opacity-60 disabled:cursor-not-allowed text-[rgb(var(--landing-text-soft))] hover:text-[rgb(var(--brand-blue))]"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 disabled={isLoading}
@@ -175,8 +175,8 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[0.9rem]">
-            <label className="flex cursor-pointer items-center gap-2 text-[rgb(var(--landing-text-soft))]">
+          <div className="flex justify-between items-center text-[0.9rem]">
+            <label className="flex gap-2 items-center cursor-pointer text-[rgb(var(--landing-text-soft))]">
               <input
                 type="checkbox"
                 name="remember"
@@ -186,7 +186,7 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
               />
               <span>Remember me</span>
             </label>
-            <a className="text-[rgb(var(--brand-blue))] no-underline" href="#">
+            <a className="no-underline text-[rgb(var(--brand-blue))]" href="#">
               Forgot password?
             </a>
           </div>
@@ -211,7 +211,7 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
           </button>
         </form>
 
-        <div className="my-8 flex items-center text-[0.8rem] uppercase tracking-[1px] text-[rgb(var(--landing-text-soft))] before:h-px before:flex-1 before:bg-[rgb(var(--brand-blue)/0.2)] before:content-[''] after:h-px after:flex-1 after:bg-[rgb(var(--brand-blue)/0.2)] after:content-['']">
+        <div className="flex items-center my-8 uppercase text-[0.8rem] tracking-[1px] text-[rgb(var(--landing-text-soft))] before:h-px before:flex-1 before:bg-[rgb(var(--brand-blue)/0.2)] before:content-[''] after:h-px after:flex-1 after:bg-[rgb(var(--brand-blue)/0.2)] after:content-['']">
           <span className="px-4">Or sign in with</span>
         </div>
 
@@ -224,14 +224,14 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
             <button
               key={button.label}
               type="button"
-              className="flex w-full max-w-70 items-center justify-center gap-2 rounded-xl border-2 border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(255_255_255/0.04)] px-4 py-[0.9rem] font-semibold text-white transition hover:-translate-y-0.5 hover:border-[rgb(var(--brand-blue))] focus-visible:outline-none focus-visible:shadow-[0_0_0_4px_rgb(var(--brand-blue)/0.18)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+              className="flex gap-2 justify-center items-center px-4 w-full font-semibold text-white rounded-xl border-2 transition hover:-translate-y-0.5 focus-visible:outline-none disabled:opacity-60 disabled:cursor-not-allowed max-w-70 border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(255_255_255/0.04)] py-[0.9rem] hover:border-[rgb(var(--brand-blue))] focus-visible:shadow-[0_0_0_4px_rgb(var(--brand-blue)/0.18)] disabled:hover:translate-y-0"
               onClick={() => handleSocialLogin(button.provider)}
               disabled={isLoading || Boolean(button.disabled)}
               aria-disabled={isLoading || button.disabled ? "true" : "false"}
               title={button.disabled ? "Coming soon" : `Continue with ${button.label}`}
             >
               <span
-                className="grid h-8 w-8 place-items-center rounded-[10px] bg-[rgb(255_255_255/0.08)]"
+                className="grid place-items-center w-8 h-8 rounded-[10px] bg-[rgb(255_255_255/0.08)]"
                 aria-hidden="true"
               >
                 {button.icon}
@@ -246,7 +246,7 @@ const SignInPanel = ({ onLogin, onSignUpClick }: SignInPanelProps) => {
           <button
             type="button"
             onClick={onSignUpClick}
-            className="border-none bg-transparent font-semibold text-[rgb(var(--brand-blue))]"
+            className="font-semibold bg-transparent border-none text-[rgb(var(--brand-blue))]"
           >
             Create one
           </button>

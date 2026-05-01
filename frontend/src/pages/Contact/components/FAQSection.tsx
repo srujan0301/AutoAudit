@@ -50,9 +50,9 @@ const FAQItem: React.FC<FAQItemProps> = ({
   isActive,
   onToggle,
 }) => (
-  <article className="mb-4 overflow-hidden rounded-[15px] border border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.02)]">
+  <article className="overflow-hidden mb-4 border rounded-[15px] border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.02)]">
     <button
-      className="flex w-full items-center justify-between bg-transparent px-6 py-5 text-left text-base text-white transition hover:bg-[rgb(255_255_255/0.04)]"
+      className="flex justify-between items-center py-5 px-6 w-full text-base text-left text-white bg-transparent transition hover:bg-[rgb(255_255_255/0.04)]"
       type="button"
       onClick={onToggle}
     >
@@ -86,7 +86,7 @@ const FAQSection: React.FC = () => {
     >
       <div className="mx-auto max-w-[900px]">
         <div className="mb-10 text-center">
-          <h2 className="mb-3 text-[2.4rem] font-semibold text-white">
+          <h2 className="mb-3 font-semibold text-white text-[2.4rem]">
             Frequently Asked Questions
           </h2>
           <p className="text-[rgb(var(--landing-text-soft))]">

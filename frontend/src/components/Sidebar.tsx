@@ -69,16 +69,16 @@ const NavButton: React.FC<NavButtonProps> = ({
     : "";
 
   return (
-    <li className="m-0 flex w-full justify-center p-0">
+    <li className="flex justify-center p-0 m-0 w-full">
       <a
         className={`${baseButton} ${themeButton} ${expandedButton} ${activeButton}`}
         href={href}
         onClick={handleClick}
       >
-        <span className="flex h-5 w-5 items-center justify-center" aria-hidden="true">
+        <span className="flex justify-center items-center w-5 h-5" aria-hidden="true">
           <Icon size={18} strokeWidth={2.2} />
         </span>
-        {isExpanded && <span className="whitespace-nowrap text-sm font-medium">{name}</span>}
+        {isExpanded && <span className="text-sm font-medium whitespace-nowrap">{name}</span>}
       </a>
     </li>
   );
@@ -154,8 +154,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onWidthChange = () => {}, isDarkMode 
         isExpanded ? "w-55" : "w-20"
       } ${sidebarTheme}`}
     >
-      <div className="flex h-screen w-full flex-col items-center px-3.75 pb-7.5 pt-5">
-        <div className="mb-10 flex w-full justify-center">
+      <div className="flex flex-col items-center pt-5 w-full h-screen px-3.75 pb-7.5">
+        <div className="flex justify-center mb-10 w-full">
           {isExpanded ? (
             <div
               className={`flex w-full max-w-47.5 items-center rounded-[25px] p-2 transition-all duration-300 hover:-translate-y-0.5 max-md:max-w-37.5 ${
@@ -205,7 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onWidthChange = () => {}, isDarkMode 
           )}
         </div>
 
-        <ul className="m-0 flex w-full flex-1 list-none flex-col items-center gap-5 p-0">
+        <ul className="flex flex-col flex-1 gap-5 items-center p-0 m-0 w-full list-none">
           <NavButton
             href={"/dashboard"}
             name={"Dashboard"}

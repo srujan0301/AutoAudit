@@ -51,3 +51,11 @@ This note documents the justification behind moving from vanilla CSS to Tailwind
 - The version is TailwindCSS v4, while a lot of AI models are still trained on v3 primarily. Mitigations:
   - Include TailwindCSS v4 in the prompt
   - Install VSCode or Cursor extensions to easily migrate from TailwindCSS v3 to v4
+- (Optional) To make TailwindCSS classes sort in order without affecting spacing (which Prettier may affect), RustyWind is an option:
+  - https://github.com/avencera/rustywind
+  - Installed globally
+    ```
+    cd frontend
+    npm install -g rustywind
+    rustywind . --write
+    ```

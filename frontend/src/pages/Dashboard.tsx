@@ -506,9 +506,9 @@ export default function Dashboard({
 }}
 
     >
-      <div className="mx-auto flex max-w-330 flex-col gap-6">
-        <div className="mb-0 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-          <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-6 mx-auto max-w-330">
+        <div className="flex flex-col gap-4 justify-between items-start mb-0 md:flex-row md:items-center">
+          <div className="flex gap-4 items-center">
             <div
               className={`flex h-14 w-14 items-center justify-center rounded-[14px] ${panelBase}`}
             >
@@ -517,7 +517,7 @@ export default function Dashboard({
                 <img
                   src="/AutoAudit.png"
                   alt="AutoAudit Logo"
-                  className="h-14 w-14 rounded-xl object-contain"
+                  className="object-contain w-14 h-14 rounded-xl"
                   loading="lazy"
                   width="56"
                   height="56"
@@ -534,19 +534,19 @@ export default function Dashboard({
           </div>
 
           <div
-            className="flex items-center gap-3 self-end md:self-auto"
+            className="flex gap-3 items-center self-end md:self-auto"
             role="group"
             aria-label="Theme toggle"
           >
             <Sun size={18} className={textTertiary} />
 
-            <label className="relative inline-block h-6.5 w-12.5">
+            <label className="inline-block relative h-6.5 w-12.5">
               <input
                 type="checkbox"
                 checked={isDarkMode}
                 onChange={onThemeToggle}
                 aria-label="Toggle theme"
-                className="peer sr-only"
+                className="sr-only peer"
               />
               <span
                 className={`absolute inset-0 cursor-pointer rounded-[26px] transition duration-300 ${
@@ -562,7 +562,7 @@ export default function Dashboard({
         <div
           className={`relative z-50 grid items-center gap-4 overflow-visible rounded-xl px-6 py-4 shadow-[0_0_0_1px_rgb(var(--brand-blue)/0.06)] md:grid-cols-[minmax(0,1fr)_auto] ${panelBase}`}
         >
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3 overflow-visible">
+          <div className="flex overflow-visible flex-wrap flex-1 gap-3 items-center min-w-0">
             <span className={`text-[14px] font-medium ${textPrimary}`}>Connection</span>
             <Dropdown
               value={selectedConnectionId}
@@ -580,7 +580,7 @@ export default function Dashboard({
             />
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3 max-sm:w-full max-sm:flex-col">
+          <div className="flex flex-wrap gap-3 justify-end items-center max-sm:w-full max-sm:flex-col">
             <button
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-[14px] font-medium transition ${secondaryButton}`}
               onClick={handleExportReport}
@@ -628,13 +628,13 @@ export default function Dashboard({
         <div
           className={`flex flex-col gap-3 rounded-2xl px-5.5 py-4.5 shadow-[0_0_0_1px_rgb(var(--brand-blue)/0.05)] ${panelBase}`}
         >
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-wrap gap-4 justify-between items-start">
             <div>
               <h3 className={`m-0 text-[18px] font-bold ${textPrimary}`}>Scan Snapshot</h3>
               <p className={`mt-1 text-[13px] ${textSecondary}`}>{summary.subtitle}</p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               {summary.kpis.map((kpi) => {
                 const Icon = kpi.icon;
                 return (
@@ -664,7 +664,7 @@ export default function Dashboard({
                     {group.items.map((item) => (
                       <div
                         key={item.label}
-                        className="flex items-center justify-between gap-2.5 text-[13px]"
+                        className="flex gap-2.5 justify-between items-center text-[13px]"
                       >
                         <span className={`whitespace-nowrap font-medium ${textSecondary}`}>
                           {item.label}
@@ -683,13 +683,13 @@ export default function Dashboard({
           )}
         </div>
 
-        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <div className="flex min-w-0 flex-col gap-6">
+        <div className="grid grid-cols-1 gap-6 items-start xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <div className="flex flex-col gap-6 min-w-0">
             <div
               className={`relative flex min-h-0 flex-col gap-4 overflow-visible rounded-xl p-6 shadow-[0_0_0_1px_rgb(var(--brand-blue)/0.05)] ${panelBase}`}
             >
-              <div className="relative z-5 flex items-center justify-between">
-                <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex relative justify-between items-center z-5">
+                <div className="flex flex-1 gap-3 items-center min-w-0">
                   <span
                     className={`inline-flex h-6 w-6 items-center justify-center rounded-md ${
                       isDarkMode
@@ -710,7 +710,7 @@ export default function Dashboard({
                 />
               </div>
 
-              <div className="flex justify-center items-center relative z-1 min-h-75 w-full overflow-hidden">
+              <div className="flex overflow-hidden relative justify-center items-center w-full z-1 min-h-75">
                 <ComplianceChart
                   isDarkMode={isDarkMode}
                   sidebarWidth={sidebarWidth}
@@ -719,7 +719,7 @@ export default function Dashboard({
             </div>
 
             <div className={`rounded-xl p-4.5 ${panelBase}`}>
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap gap-3 justify-between items-start mb-3">
                 <div>
                   <h3 className={`m-0 text-[16px] font-bold ${textPrimary}`}>Recent Scans</h3>
                   <p className={`mt-1 text-[12px] ${textSecondary}`}>
@@ -828,7 +828,7 @@ export default function Dashboard({
                                 }`}
                               >
                                 <div className="flex flex-col gap-0.5 leading-[1.2]">
-                                  <div className="text-[12px] font-bold">{dt.date}</div>
+                                  <div className="font-bold text-[12px]">{dt.date}</div>
                                   <div className={`text-[12px] ${textTertiary}`}>{dt.time}</div>
                                 </div>
                               </td>
@@ -887,8 +887,8 @@ export default function Dashboard({
                   : "border border-border-subtle border-l-[rgb(var(--brand-blue)/0.4)] bg-white"
               }`}
             >
-              <div className="mb-3.5 flex min-w-0 items-center justify-between">
-                <div className="flex min-w-0 flex-1 items-center gap-3">
+              <div className="flex justify-between items-center mb-3.5 min-w-0">
+                <div className="flex flex-1 gap-3 items-center min-w-0">
                   <span
                     className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${
                       isDarkMode
@@ -948,7 +948,7 @@ export default function Dashboard({
                   </p>
                 </div>
               ) : (
-                <div className="mt-3 flex flex-col gap-2.5">
+                <div className="flex flex-col gap-2.5 mt-3">
                   {nextFixes.topItems.map((r, idx) => (
                     <button
                       key={`${r.control_id || idx}`}
@@ -962,7 +962,7 @@ export default function Dashboard({
                       }
                       type="button"
                     >
-                      <span className="text-[12px] font-extrabold tabular-nums text-[rgb(var(--brand-blue-soft)/0.95)]">
+                      <span className="font-extrabold tabular-nums text-[12px] text-[rgb(var(--brand-blue-soft)/0.95)]">
                         {r.control_id || "—"}
                       </span>
 

@@ -73,9 +73,9 @@ const ContactInfoGrid: React.FC = () => {
       {infoCards.map((card) => (
         <article
           key={card.title}
-          className="rounded-[20px] border border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.03)] p-8 transition-all duration-300 hover:border-[rgb(var(--brand-blue))] hover:bg-[rgb(255_255_255/0.05)]"
+          className="p-8 border transition-all duration-300 rounded-[20px] border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.03)] hover:border-[rgb(var(--brand-blue))] hover:bg-[rgb(255_255_255/0.05)]"
         >
-          <div className="mb-5 flex h-[56px] w-[56px] items-center justify-center rounded-[14px] bg-gradient-to-br from-[rgb(var(--brand-blue))] to-[rgb(var(--brand-blue-deep))] text-2xl">
+          <div className="flex justify-center items-center mb-5 text-2xl bg-gradient-to-br h-[56px] w-[56px] rounded-[14px] from-[rgb(var(--brand-blue))] to-[rgb(var(--brand-blue-deep))]">
             {card.icon}
           </div>
 
@@ -92,20 +92,20 @@ const ContactInfoGrid: React.FC = () => {
               <a
                 key={`${link.label}-${index}`}
                 href={link.href}
-                className="block text-[rgb(var(--brand-blue))] transition hover:text-[rgb(var(--brand-blue-deep))]"
+                className="block transition text-[rgb(var(--brand-blue))] hover:text-[rgb(var(--brand-blue-deep))]"
               >
                 {link.label}
               </a>
             ))}
 
           {card.social && (
-            <div className="mt-4 flex gap-4">
+            <div className="flex gap-4 mt-4">
               {card.social.map(({ label, icon: Icon, href }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="flex h-[44px] w-[44px] items-center justify-center rounded-[12px] border border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(var(--brand-blue)/0.12)] text-white transition hover:border-transparent hover:bg-gradient-to-br hover:from-[rgb(var(--brand-blue))] hover:to-[rgb(var(--brand-blue-deep))]"
+                  className="flex justify-center items-center text-white border transition hover:bg-gradient-to-br hover:border-transparent h-[44px] w-[44px] rounded-[12px] border-[rgb(var(--brand-blue)/0.2)] bg-[rgb(var(--brand-blue)/0.12)] hover:from-[rgb(var(--brand-blue))] hover:to-[rgb(var(--brand-blue-deep))]"
                 >
                   <Icon size={18} strokeWidth={1.7} />
                 </a>

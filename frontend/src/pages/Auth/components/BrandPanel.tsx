@@ -19,7 +19,7 @@ const particles = [
 const BrandPanel = () => {
   return (
     <section
-      className="relative flex items-center justify-center overflow-hidden rounded-3xl px-12 py-10 text-white max-lg:min-h-[60vh] max-sm:px-6"
+      className="flex overflow-hidden relative justify-center items-center py-10 px-12 text-white rounded-3xl max-lg:min-h-[60vh] max-sm:px-6"
       aria-labelledby="brand-title"
     >
       <style>{`
@@ -63,7 +63,7 @@ const BrandPanel = () => {
         />
       ))}
 
-      <div className="relative z-10 flex max-w-105 flex-col items-center gap-6 text-center">
+      <div className="flex relative z-10 flex-col gap-6 items-center text-center max-w-105">
         <picture>
           <source srcSet="/AutoAudit.webp" type="image/webp" />
           <img
@@ -75,7 +75,7 @@ const BrandPanel = () => {
         </picture>
 
         <div id="brand-title">
-          <h1 className="mb-4 bg-[linear-gradient(135deg,#ffffff,#3b82f6)] bg-clip-text text-[clamp(1.8rem,4vw,2.3rem)] font-bold text-transparent">
+          <h1 className="mb-4 font-bold text-transparent bg-clip-text bg-[linear-gradient(135deg,#ffffff,#3b82f6)] text-[clamp(1.8rem,4vw,2.3rem)]">
             Access security insights anywhere
           </h1>
           <p className="m-0 text-center leading-[1.6] text-[rgb(var(--landing-text-soft))]">
@@ -85,7 +85,7 @@ const BrandPanel = () => {
         </div>
 
         <div
-          className="mt-4 flex w-full flex-col gap-4 max-lg:hidden"
+          className="flex flex-col gap-4 mt-4 w-full max-lg:hidden"
           aria-label="Platform highlights"
         >
           {brandFeatures.map((feature) => {
@@ -94,10 +94,10 @@ const BrandPanel = () => {
             return (
               <div
                 key={feature.text}
-                className="flex items-center gap-4 rounded-xl border border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.03)] p-4 text-left"
+                className="flex gap-4 items-center p-4 text-left rounded-xl border border-[rgb(var(--brand-blue)/0.1)] bg-[rgb(255_255_255/0.03)]"
               >
                 <span
-                  className="grid h-10 w-10 place-items-center rounded-[10px] bg-[linear-gradient(135deg,#3b82f6,#2563eb)]"
+                  className="grid place-items-center w-10 h-10 rounded-[10px] bg-[linear-gradient(135deg,#3b82f6,#2563eb)]"
                   aria-hidden="true"
                 >
                   <Icon size={18} strokeWidth={2.2} />
