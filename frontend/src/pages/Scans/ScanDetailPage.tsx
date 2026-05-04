@@ -430,8 +430,8 @@ const ScanDetailPage: React.FC<ScanDetailPageProps> = ({
 
 				{/* Header card */}
 				<div className={`rounded-xl border p-6 mb-6 ${cardBg}`}>
-					<div className="flex items-center gap-4 mb-5 max-md:flex-col max-md:items-start">
-						<div className="flex h-14 w-14 items-center justify-center rounded-xl bg-teal-400/15 text-teal-400">
+					<div className="flex gap-4 items-center mb-5 max-md:flex-col max-md:items-start">
+						<div className="flex justify-center items-center w-14 h-14 text-teal-400 rounded-xl bg-teal-400/15">
 							<Shield size={32} />
 						</div>
 						<div className="flex-1">
@@ -534,10 +534,10 @@ const ScanDetailPage: React.FC<ScanDetailPageProps> = ({
 					<div
 						className={`rounded-xl border p-6 text-center mb-6 ${cardBg}`}
 					>
-						<div className="flex flex-col items-center gap-4">
+						<div className="flex flex-col gap-4 items-center">
 							<Loader2
 								size={24}
-								className="animate-spin text-teal-400"
+								className="text-teal-400 animate-spin"
 							/>
 							<div>
 								<h3
@@ -554,7 +554,7 @@ const ScanDetailPage: React.FC<ScanDetailPageProps> = ({
 						</div>
 
 						<div className="mt-4">
-							<div className="h-2.5 w-full overflow-hidden rounded-full border border-slate-400/20 bg-slate-500/20">
+							<div className="overflow-hidden w-full h-2.5 rounded-full border border-slate-400/20 bg-slate-500/20">
 								<div
 									className={`h-full rounded-full transition-all duration-300 ${progressFillColor}`}
 									style={{ width: `${progressPercent}%` }}
@@ -574,7 +574,7 @@ const ScanDetailPage: React.FC<ScanDetailPageProps> = ({
 				)}
 
 				{/* Stats grid */}
-				<div className="mb-6 grid grid-cols-4 gap-4 max-md:grid-cols-2 max-[480px]:grid-cols-1">
+				<div className="grid grid-cols-4 gap-4 mb-6 max-md:grid-cols-2 max-[480px]:grid-cols-1">
 					{statCards.map((stat) => (
 						<div
 							key={stat.key}
@@ -625,8 +625,8 @@ const ScanDetailPage: React.FC<ScanDetailPageProps> = ({
 											isPending ? "opacity-70" : ""
 										} ${isSkipped ? "opacity-60" : ""}`}
 									>
-										<div className="flex items-start justify-between gap-3 max-md:flex-col max-md:gap-2">
-											<div className="flex flex-1 items-center gap-2.5">
+										<div className="flex gap-3 justify-between items-start max-md:flex-col max-md:gap-2">
+											<div className="flex flex-1 gap-2.5 items-center">
 												{getResultIcon(result.status)}
 												<span
 													className={`rounded px-2 py-0.5 font-mono text-xs ${textTertiary} ${
@@ -675,10 +675,10 @@ const ScanDetailPage: React.FC<ScanDetailPageProps> = ({
 
 				{/* Error card */}
 				{scan.status === "failed" && scan.error && (
-					<div className="mt-6 flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-5">
+					<div className="flex gap-3 items-start p-5 mt-6 rounded-xl border border-red-500/30 bg-red-500/10">
 						<AlertCircle
 							size={20}
-							className="shrink-0 text-red-500"
+							className="text-red-500 shrink-0"
 						/>
 						<div>
 							<h4 className="m-0 mb-2 text-base font-semibold text-red-500">
