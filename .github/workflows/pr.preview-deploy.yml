@@ -170,6 +170,7 @@ jobs:
           echo "BACKEND_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/backend:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
           echo "WORKER_IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/worker:pr-${{ needs.gate.outputs.pr-number }}" >> "$GITHUB_ENV"
           echo "PREVIEW_ENC_KEY=${{ secrets.PREVIEW_ENCRYPTION_KEY }}" >> "$GITHUB_ENV"
+          echo "PREVIEW_SECRET_KEY=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
 
       - name: Set lowercase PowerShell image name
         if: needs.gate.outputs.m365 == 'true'
@@ -270,7 +271,7 @@ jobs:
             -p 8000:8000 \
             -e APP_ENV=preview \
             -e DATABASE_URL=postgresql+asyncpg://autoaudit:autoaudit_dev_password@db:5432/autoaudit \
-            -e SECRET_KEY=preview-ephemeral-key-not-sensitive \
+            -e SECRET_KEY="$PREVIEW_SECRET_KEY" \
             -e ENCRYPTION_KEY="$PREVIEW_ENC_KEY" \
             -e REDIS_URL=redis://redis:6379 \
             -e OPA_URL=http://opa:8181 \
@@ -394,3 +395,36 @@ jobs:
             sleep 60
           done
           echo "6-hour timeout reached. Preview shutting down."
+
+      - name: Mark PR comment as expired
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = parseInt('${{ needs.gate.outputs.pr-number }}');
+            const runId = '${{ github.run_id }}';
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+            const existing = comments.data.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes('<!-- autoaudit-preview -->')
+            );
+            if (!existing) return;
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existing.id,
+              body: [
+                '<!-- autoaudit-preview -->',
+                `<!-- run-id: ${runId} -->`,
+                '## Preview Environment',
+                '',
+                '> **Preview has expired.** The tunnel URLs above no longer resolve.',
+                '> Add `deploy-preview` to spin up a fresh environment.',
+                '',
+                `> [Workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})`
+              ].join('\n'),
+            });
