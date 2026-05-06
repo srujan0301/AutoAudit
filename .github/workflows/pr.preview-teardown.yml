@@ -47,6 +47,7 @@ jobs:
               name: 'teardown-preview'
             });
 
+      # Known risk: listComments only returns the first page so teardown may miss the preview comment on PRs with >30 comments.
       - name: Find preview comment and extract run ID
         id: find-run
         uses: actions/github-script@v7
