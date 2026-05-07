@@ -85,12 +85,30 @@ const LandingHeader = ({
 
             {/* Links */}
             <nav className="flex flex-col gap-4 text-white mt-12">
-              {navLinks.map((link) => (
-                <Link key={link.label} to={link.href}>
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+  {navLinks
+    .filter((link) => !hiddenLinkSet.has(link.label.toLowerCase()))
+    .map((link) => (
+      <Link
+        key={link.label}
+        to={link.href}
+        onClick={() => setIsOpen(false)}
+      >
+        {link.label}
+      </Link>
+    ))}
+
+  {showSignIn && (
+    <button
+      className="btn-primary mt-4"
+      onClick={() => {
+        setIsOpen(false);
+        onSignInClick?.();
+      }}
+    >
+      Sign In
+    </button>
+  )}
+</nav>
           </div>
         </div>
       )}
