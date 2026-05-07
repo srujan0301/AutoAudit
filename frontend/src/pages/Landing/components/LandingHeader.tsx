@@ -25,57 +25,57 @@ const LandingHeader = ({
 
   return (
     <>
-      {/* HEADER */}
-      <header className="flex items-center justify-between px-6 py-4 relative z-50">
-        
-        {/* Left Section */}
-        <div className="flex items-center gap-3">
-          
-          {/* Hamburger Button  Mobile Only */}
-          <button
-            className="md:hidden text-white text-2xl"
-            onClick={() => setIsOpen(true)}
-            aria-label="Open navigation menu"
+  {/* HEADER */}
+  <header className="flex items-center justify-between px-6 py-4 relative z-50">
+    
+    {/* Left Section */}
+    <div className="flex items-center gap-3">
+      
+      {/* Hamburger Button - Mobile Only */}
+      <button
+        className="md:hidden text-white text-2xl"
+        onClick={() => setIsOpen(true)}
+        aria-label="Open navigation menu"
+      >
+        ☰
+      </button>
+
+      {/* Logo */}
+      <Link to="/#main-content">
+        <img
+          src="/AutoAudit.png"
+          alt="AutoAudit"
+          className="h-8 w-auto"
+        />
+      </Link>
+    </div>
+
+    {/* Desktop Navigation */}
+    <nav className="hidden md:flex items-center gap-6 text-white">
+      {navLinks
+        .filter(
+          (link) => !hiddenLinkSet.has(link.label.toLowerCase())
+        )
+        .map((link) => (
+          <Link
+            key={link.label}
+            to={link.href}
+            className="hover:text-blue-400 transition-colors"
           >
-            ☰
-          </button>
-
-          {/* Logo */}
-          <Link to="/#main-content">
-            <img
-              src="/AutoAudit.png"
-              alt="AutoAudit"
-              className="h-8 w-auto"
-            />
+            {link.label}
           </Link>
-        </div>
+        ))}
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-white">
-          {navLinks
-            .filter(
-              (link) => !hiddenLinkSet.has(link.label.toLowerCase())
-            )
-            .map((link) => (
-              <Link
-                key={link.label}
-                to={link.href}
-                className="hover:text-blue-400 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-
-          {showSignIn && (
-            <button
-              className="btn-primary"
-              onClick={onSignInClick}
-            >
-              Sign In
-            </button>
-          )}
-        </nav>
-      </header>
+      {showSignIn && (
+        <button
+          className="btn-primary"
+          onClick={onSignInClick}
+        >
+          Sign In
+        </button>
+      )}
+    </nav>
+  </header>
 
       {/* MOBILE SIDEBAR */}
       {isOpen && (
