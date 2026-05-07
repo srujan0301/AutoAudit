@@ -248,9 +248,9 @@
 
 .hero-text h1 {
   margin-bottom: 1.5rem;
+  color: var(--text-main);
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   line-height: 1.2;
-  color: var(--text-main);
 }
 
 .hero-text p {
@@ -406,21 +406,31 @@
   opacity: 1;
 }
 
-.feature-icon {
-  position: relative;
-  z-index: 1;
+.feature-icon,
+.benefit-icon {
   display: flex;
-  width: 48px;
-  height: 48px;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
   color: rgb(236 240 255 / 98%);
   font-size: 1.5rem;
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   border: 1px solid rgb(255 255 255 / 8%);
   border-radius: 14px;
   box-shadow: 0 10px 22px rgb(59 130 246 / 22%);
+}
+
+.feature-icon {
+  position: relative;
+  z-index: 1;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+}
+
+.benefit-icon {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
 }
 
 .feature-card h3 {
@@ -566,21 +576,6 @@
   border-color: var(--accent);
   box-shadow: 0 20px 45px rgb(59 130 246 / 18%);
   transform: translateX(8px);
-}
-
-.benefit-icon {
-  display: flex;
-  flex-shrink: 0;
-  width: 50px;
-  height: 50px;
-  align-items: center;
-  justify-content: center;
-  color: rgb(236 240 255 / 98%);
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 14px;
-  box-shadow: 0 10px 22px rgb(59 130 246 / 22%);
 }
 
 .benefit-text h3 {
