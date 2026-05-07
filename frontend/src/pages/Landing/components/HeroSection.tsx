@@ -37,8 +37,7 @@ const HeroSection = ({ onSignInClick }: HeroSectionProps) => {
         <div className="hero-text">
           <p className="section-tag">AutoAudit Platform</p>
 
-          <h1>
-            Access your compliance dashboard and security insights.
+          <h1>  Access your compliance dashboard and security insights.
           </h1>
 
           <p>
