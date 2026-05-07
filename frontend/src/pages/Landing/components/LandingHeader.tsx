@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const navLinks = [
@@ -20,42 +20,81 @@ const LandingHeader = ({
   hiddenLinks = [],
   showSignIn = true,
 }: LandingHeaderProps) => {
-  const hiddenLinkSet = new Set(hiddenLinks.map((link) => link.toLowerCase()));
+  const hiddenLinkSet = new Set(hiddenLinks.map((l) => l.toLowerCase()));
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="landing-header">
-      <Link className="landing-logo" to="/#main-content" aria-label="AutoAudit home">
-        <picture>
-          <source srcSet="/AutoAudit.webp" type="image/webp" />
-          <img src="/AutoAudit.png" alt="AutoAudit" loading="lazy" />
-        </picture>
-      </Link>
+    <>
+      {/* HEADER */}
+      <header className="flex items-center justify-between px-6 py-4 relative z-50">
 
-      <nav className="landing-nav" aria-label="Primary navigation">
-        {navLinks
-          .filter((link) => !hiddenLinkSet.has(link.label.toLowerCase()))
-          .map((link) => (
-            link.href.startsWith("/") ? (
+        {/* Hamburger (mobile only*/}
+        <div className="flex items-center gap-3">
+
+          <button
+            className={`md:hidden text-white text-2xl ${isOpen ? "hidden" : "block"}`}
+            onClick={() => setIsOpen(true)}
+          >
+            ☰
+          </button>
+
+          {/* Logo */}
+          <Link to="/#main-content">
+            <img src="/AutoAudit.png" alt="AutoAudit" className="h-8" />
+          </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-6 text-white">
+          {navLinks
+            .filter((link) => !hiddenLinkSet.has(link.label.toLowerCase()))
+            .map((link) => (
               <Link key={link.label} to={link.href}>
                 {link.label}
               </Link>
-            ) : (
-              <a key={link.label} href={link.href}>
-                {link.label}
-              </a>
-            )
-          ))}
-        {showSignIn && (
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={onSignInClick}
-          >
-            Sign In
-          </button>
-        )}
-      </nav>
-    </header>
+            ))}
+
+          {showSignIn && (
+            <button className="btn-primary" onClick={onSignInClick}>
+              Sign In
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* MOBILE SIDEBAR */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex">
+
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Sidebar */}
+          <div className="relative w-64 bg-slate-900 h-full p-6 z-50 shadow-lg transform transition-transform duration-300">
+
+            {/* Close button */}
+            <button
+              className="text-white text-2xl absolute top-4 right-4"
+              onClick={() => setIsOpen(false)}
+            >
+              ✕
+            </button>
+
+            {/* Links */}
+            <nav className="flex flex-col gap-4 text-white mt-12">
+              {navLinks.map((link) => (
+                <Link key={link.label} to={link.href}>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
