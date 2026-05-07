@@ -42,6 +42,7 @@ class ASRRulesDataCollector(BaseDataCollector):
     async def collect(self, client: GraphClient) -> dict[str, Any]:
         """Collect ASR rule configuration data."""
         configs = await client.get_all_pages("/deviceManagement/deviceConfigurations")
+        findings: list[tuple[str, str | None]] = []
         for config in configs:
             if "endpointprotection" not in config.get("@odata.type", "").lower():
                 continue
@@ -53,16 +54,28 @@ class ASRRulesDataCollector(BaseDataCollector):
             )
             win32_value = full_config.get("defenderOfficeMacroCodeAllowWin32ImportsType")
             if win32_value:
-                return {
-                    "win32_api_rule_found": True,
-                    "win32_api_rule_state": _normalize_state(win32_value),
-                    "source": "legacy_endpoint_protection",
-                    "policy_name": config.get("displayName"),
-                }
+                findings.append(
+                    (_normalize_state(win32_value), config.get("displayName"))
+                )
 
+        if not findings:
+            return {
+                "win32_api_rule_found": False,
+                "win32_api_rule_state": "not_configured",
+                "source": None,
+                "policy_name": None,
+            }
+
+        # ASD ML2 requires Block on every profile. If any profile is weaker, the
+        # tenant is non-compliant — surface the weakest state and the profile it
+        # came from. Order: disabled < audit < warn < block.
+        severity = {"disabled": 0, "audit": 1, "warn": 2, "block": 3}
+        weakest_state, weakest_name = min(
+            findings, key=lambda f: severity.get(f[0], -1)
+        )
         return {
-            "win32_api_rule_found": False,
-            "win32_api_rule_state": "not_configured",
-            "source": None,
-            "policy_name": None,
+            "win32_api_rule_found": True,
+            "win32_api_rule_state": weakest_state,
+            "source": "legacy_endpoint_protection",
+            "policy_name": weakest_name,
         }
