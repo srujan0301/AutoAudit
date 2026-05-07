@@ -37,7 +37,9 @@ const HeroSection = ({ onSignInClick }: HeroSectionProps) => {
         <div className="hero-text">
           <p className="section-tag">AutoAudit Platform</p>
 
-          <h1>Access your compliance dashboard and security insights.</h1>
+          <h1>
+            Access your compliance dashboard and security insights.
+          </h1>
 
           <p>
             Compliance made easy for you. View your dashboards anytime,
@@ -46,7 +48,11 @@ const HeroSection = ({ onSignInClick }: HeroSectionProps) => {
           </p>
 
           <div className="hero-buttons">
-            <button type="button" className="btn-primary" onClick={onSignInClick}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={onSignInClick}
+            >
               Get Started
             </button>
 
@@ -56,7 +62,10 @@ const HeroSection = ({ onSignInClick }: HeroSectionProps) => {
           </div>
         </div>
 
-        <div className="hero-visual" aria-label="AutoAudit platform highlights">
+        <div
+          className="hero-visual"
+          aria-label="AutoAudit platform highlights"
+        >
           {floatingCards.map(({ icon: Icon, title, subtitle }) => (
             <article key={title} className="floating-card">
               <div className="card-icon" aria-hidden="true">
