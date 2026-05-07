@@ -32,7 +32,7 @@ const LandingHeader = ({
         <div className="flex items-center gap-3">
 
           <button
-            className={`md:hidden text-white text-2xl ${isOpen ? "hidden" : "block"}`}
+             className="md:hidden text-white text-2xl"
             onClick={() => setIsOpen(true)}
           >
             ☰
@@ -64,7 +64,7 @@ const LandingHeader = ({
 
       {/* MOBILE SIDEBAR */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex">
+        <div className="fixed inset-0 z-[100] flex md:hidden">
 
           {/* Overlay */}
           <div
