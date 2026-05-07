@@ -27,45 +27,60 @@ const LandingHeader = ({
     <>
       {/* HEADER */}
       <header className="flex items-center justify-between px-6 py-4 relative z-50">
-
-        {/* Hamburger (mobile only*/}
+        
+        {/* Left Section */}
         <div className="flex items-center gap-3">
-
+          
+          {/* Hamburger Button  Mobile Only */}
           <button
-             className="md:hidden text-white text-2xl"
+            className="md:hidden text-white text-2xl"
             onClick={() => setIsOpen(true)}
+            aria-label="Open navigation menu"
           >
             ☰
           </button>
 
           {/* Logo */}
           <Link to="/#main-content">
-            <img src="/AutoAudit.png" alt="AutoAudit" className="h-8" />
+            <img
+              src="/AutoAudit.png"
+              alt="AutoAudit"
+              className="h-8 w-auto"
+            />
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6 text-white">
+        <nav className="hidden md:flex items-center gap-6 text-white">
           {navLinks
-            .filter((link) => !hiddenLinkSet.has(link.label.toLowerCase()))
+            .filter(
+              (link) => !hiddenLinkSet.has(link.label.toLowerCase())
+            )
             .map((link) => (
-              <Link key={link.label} to={link.href}>
+              <Link
+                key={link.label}
+                to={link.href}
+                className="hover:text-blue-400 transition-colors"
+              >
                 {link.label}
               </Link>
             ))}
 
           {showSignIn && (
-            <button className="btn-primary" onClick={onSignInClick}>
+            <button
+              className="btn-primary"
+              onClick={onSignInClick}
+            >
               Sign In
             </button>
           )}
-        </div>
+        </nav>
       </header>
 
       {/* MOBILE SIDEBAR */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex md:hidden">
-
+          
           {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/50"
@@ -73,42 +88,47 @@ const LandingHeader = ({
           />
 
           {/* Sidebar */}
-          <div className="relative w-64 bg-slate-900 h-full p-6 z-50 shadow-lg transform transition-transform duration-300">
-
-            {/* Close button */}
+          <div className="relative w-64 bg-slate-900 h-full p-6 z-50 shadow-lg transition-transform duration-300">
+            
+            {/* Close Button */}
             <button
               className="text-white text-2xl absolute top-4 right-4"
               onClick={() => setIsOpen(false)}
+              aria-label="Close navigation menu"
             >
               ✕
             </button>
 
-            {/* Links */}
+            {/* Mobile Navigation */}
             <nav className="flex flex-col gap-4 text-white mt-12">
-  {navLinks
-    .filter((link) => !hiddenLinkSet.has(link.label.toLowerCase()))
-    .map((link) => (
-      <Link
-        key={link.label}
-        to={link.href}
-        onClick={() => setIsOpen(false)}
-      >
-        {link.label}
-      </Link>
-    ))}
+              {navLinks
+                .filter(
+                  (link) =>
+                    !hiddenLinkSet.has(link.label.toLowerCase())
+                )
+                .map((link) => (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
 
-  {showSignIn && (
-    <button
-      className="btn-primary mt-4"
-      onClick={() => {
-        setIsOpen(false);
-        onSignInClick?.();
-      }}
-    >
-      Sign In
-    </button>
-  )}
-</nav>
+              {showSignIn && (
+                <button
+                  className="btn-primary mt-4"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onSignInClick?.();
+                  }}
+                >
+                  Sign In
+                </button>
+              )}
+            </nav>
           </div>
         </div>
       )}
