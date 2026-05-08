@@ -31,26 +31,51 @@ const LandingHeader = ({
         {/* Left Section */}
         <div className="flex items-center gap-3">
           
-          {/* Hamburger Button  Mobile Only */}
+          {/* Hamburger Button - Mobile Only */}
           <button
             className="md:hidden text-white text-2xl"
             onClick={() => setIsOpen(true)}
             aria-label="Open navigation menu"
           >
-            {link.label}
-          </Link>
-        ))}
+            ☰
+          </button>
 
-      {showSignIn && (
-        <button
-          className="btn-primary"
-          onClick={onSignInClick}
-        >
-          Sign In
-        </button>
-      )}
-    </nav>
-  </header>
+          {/* Logo */}
+          <Link to="/#main-content">
+            <img
+              src="/AutoAudit.png"
+              alt="AutoAudit"
+              className="h-8 w-auto"
+            />
+          </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6 text-white">
+          {navLinks
+            .filter(
+              (link) => !hiddenLinkSet.has(link.label.toLowerCase())
+            )
+            .map((link) => (
+              <Link
+                key={link.label}
+                to={link.href}
+                className="hover:text-blue-400 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+
+          {showSignIn && (
+            <button
+              className="btn-primary"
+              onClick={onSignInClick}
+            >
+              Sign In
+            </button>
+          )}
+        </nav>
+      </header>
 
       {/* MOBILE SIDEBAR */}
       {isOpen && (
