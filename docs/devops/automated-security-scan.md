@@ -1,4 +1,4 @@
-# DevSecOps Contribution - Week 1
+# Automated Security Scan
 
 ## Objective
 Improve CI/CD security in the AutoAudit project by adding an automated Python security scan.
