@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
     @app.get("/version")
     def version():
         return {
-            "version": "0.1.0",
+            "version": app.version,
         }
 
     return app
