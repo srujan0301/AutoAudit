@@ -37,45 +37,20 @@ const LandingHeader = ({
             onClick={() => setIsOpen(true)}
             aria-label="Open navigation menu"
           >
-            ☰
-          </button>
-
-          {/* Logo */}
-          <Link to="/#main-content">
-            <img
-              src="/AutoAudit.png"
-              alt="AutoAudit"
-              className="h-8 w-auto"
-            />
+            {link.label}
           </Link>
-        </div>
+        ))}
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-white">
-          {navLinks
-            .filter(
-              (link) => !hiddenLinkSet.has(link.label.toLowerCase())
-            )
-            .map((link) => (
-              <Link
-                key={link.label}
-                to={link.href}
-                className="hover:text-blue-400 transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-
-          {showSignIn && (
-            <button
-              className="btn-primary"
-              onClick={onSignInClick}
-            >
-              Sign In
-            </button>
-          )}
-        </nav>
-      </header>
+      {showSignIn && (
+        <button
+          className="btn-primary"
+          onClick={onSignInClick}
+        >
+          Sign In
+        </button>
+      )}
+    </nav>
+  </header>
 
       {/* MOBILE SIDEBAR */}
       {isOpen && (
