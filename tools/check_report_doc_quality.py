@@ -16,9 +16,12 @@ def check_required_sections(file_path: Path) -> bool:
 
     content = file_path.read_text(encoding="utf-8")
 
-    missing_sections = [
-        section for section in REQUIRED_SECTIONS if section not in content
-    ]
+   lines = [line.strip() for line in content.splitlines()]
+
+missing_sections = [
+    section for section in REQUIRED_SECTIONS
+    if section not in lines
+]
 
     if missing_sections:
         print("FAIL: Missing required sections:")
