@@ -119,7 +119,7 @@ const LandingHeader = ({
 
               {showSignIn && (
                 <button
-                  className="btn-primary mt-4"
+                  className="mt-4 w-full rounded-full bg-blue-600 px-4 py-3 text-white shadow-lg shadow-blue-500/40 hover:bg-blue-700 transition-colors"
                   onClick={() => {
                     setIsOpen(false);
                     onSignInClick?.();
