@@ -9,7 +9,6 @@ import LoginHeader from "./components/LoginHeader";
 import BrandPanel from "./components/BrandPanel";
 import LandingFooter from "../Landing/components/LandingFooter";
 import { useAuth } from "../../context/AuthContext";
-import "./LoginPage.css";
 
 const CALLBACK_CACHE_KEY = "autoaudit.oauth.google.callback.params";
 
@@ -22,6 +21,7 @@ type OAuthCallbackPayload = {
 
 function safeJsonParse(value: string | null): unknown {
   if (!value) return null;
+
   try {
     return JSON.parse(value) as unknown;
   } catch {
@@ -31,11 +31,16 @@ function safeJsonParse(value: string | null): unknown {
 
 function readCachedCallbackParams(): OAuthCallbackPayload | null {
   if (typeof window === "undefined") return null;
+
   try {
-    const parsed = safeJsonParse(window.sessionStorage.getItem(CALLBACK_CACHE_KEY));
+    const parsed = safeJsonParse(
+      window.sessionStorage.getItem(CALLBACK_CACHE_KEY)
+    );
+
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       return parsed as OAuthCallbackPayload;
     }
+
     return null;
   } catch {
     return null;
@@ -44,6 +49,7 @@ function readCachedCallbackParams(): OAuthCallbackPayload | null {
 
 function writeCachedCallbackParams(payload: OAuthCallbackPayload): void {
   if (typeof window === "undefined") return;
+
   try {
     window.sessionStorage.setItem(CALLBACK_CACHE_KEY, JSON.stringify(payload));
   } catch {
@@ -53,6 +59,7 @@ function writeCachedCallbackParams(payload: OAuthCallbackPayload): void {
 
 function clearCachedCallbackParams(): void {
   if (typeof window === "undefined") return;
+
   try {
     window.sessionStorage.removeItem(CALLBACK_CACHE_KEY);
   } catch {
@@ -113,6 +120,7 @@ const GoogleCallbackPage = () => {
         if (!cancelled) {
           setError(oauthErrorDescription || oauthError);
         }
+
         clearCachedCallbackParams();
         return;
       }
@@ -121,6 +129,7 @@ const GoogleCallbackPage = () => {
         if (!cancelled) {
           setError("Missing access token. Please try signing in again.");
         }
+
         clearCachedCallbackParams();
         return;
       }
@@ -144,8 +153,10 @@ const GoogleCallbackPage = () => {
             err instanceof Error
               ? err.message
               : "Google sign-in failed. Please try again.";
+
           setError(msg);
         }
+
         clearCachedCallbackParams();
       }
     }
@@ -155,65 +166,45 @@ const GoogleCallbackPage = () => {
     return () => {
       cancelled = true;
     };
-    // Intentionally run once on mount — see comment in original implementation.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [auth]);
 
   return (
-    <div className="login-page">
+    <div className="login-page min-h-screen flex flex-col bg-white text-slate-900">
       <LoginHeader />
-      <main className="login-main">
+
+      <main className="login-main flex flex-1 flex-col lg:flex-row items-center justify-center gap-8 px-6 py-10 text-slate-900 [&_*]:text-slate-900">
         <BrandPanel />
-        <section className="login-form-section">
-          <div className="login-form-card">
+
+        <section className="login-form-section w-full max-w-md">
+          <div className="login-form-card rounded-2xl border border-slate-200 bg-white p-6 shadow-lg">
             {error ? (
               <>
-                <div className="login-form-header">
-                  <h2>Sign-in failed</h2>
-                  <p>We couldn’t complete Google sign-in. Please try again.</p>
+                <div className="login-form-header mb-6 text-center">
+                  <h2 className="text-2xl font-semibold text-slate-900">
+                    Sign-in failed
+                  </h2>
+                  <p className="mt-2 text-sm text-slate-600">
+                    We couldn’t complete Google sign-in. Please try again.
+                  </p>
                 </div>
-                <div
-                  className="error-message"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "12px",
-                    backgroundColor: "rgba(239, 68, 68, 0.1)",
-                    border: "1px solid rgba(239, 68, 68, 0.3)",
-                    borderRadius: "8px",
-                    color: "#ef4444",
-                    marginTop: "24px",
-                    marginBottom: "16px",
-                  }}
-                >
+
+                <div className="error-message mb-4 mt-6 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-600">
                   <AlertCircle size={18} />
                   <span>{error}</span>
                 </div>
 
-                <button type="button" className="btn-signin" onClick={() => navigate("/login")}>
+                <button
+                  type="button"
+                  className="btn-signin w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  onClick={() => navigate("/login")}
+                >
                   Back to sign in
                 </button>
               </>
             ) : (
-              <div
-                style={{
-                  marginTop: "10px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "12px",
-                  minHeight: "140px",
-                  color: "#b0c4de",
-                }}
-              >
-                <Loader2
-                  size={28}
-                  className="animate-spin"
-                  style={{ animation: "spin 1s linear infinite" }}
-                />
-                <div style={{ fontSize: "14px" }}>Please wait while we sign you in.</div>
+              <div className="mt-2 flex min-h-36 flex-col items-center justify-center gap-3 text-slate-500">
+                <Loader2 size={28} className="animate-spin" />
+                <div className="text-sm">Please wait while we sign you in.</div>
               </div>
             )}
           </div>
