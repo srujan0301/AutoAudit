@@ -12,13 +12,8 @@ import {
 } from "lucide-react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import {
-  getBenchmarks,
-  getConnections,
-  getScans,
-  getScan,
-} from "../api/client";
-import { formatDateTimePartsAEST } from "../utils/helpers";
+import { getBenchmarks, getConnections, getScans, getScan } from "../api/client";
+import { RelativeTime } from "../components/RelativeTime";
 
 type ChartType = "doughnut" | "pie" | "bar";
 
@@ -314,13 +309,6 @@ export default function Dashboard({
         ? s?.finished_at || s?.started_at
         : s?.started_at || s?.finished_at) || null;
 
-    const dt = lastScanLabel
-      ? formatDateTimePartsAEST(lastScanLabel)
-      : { date: "-", time: "-" };
-
-    const lastTime = dt.time !== "-" ? dt.time : "—";
-    const lastDate = dt.date !== "-" ? dt.date : "—";
-
     const subtitle = !hasScan
       ? "No scans yet"
       : `${isCompleted ? "Latest completed scan" : "Latest scan"}${
@@ -329,25 +317,33 @@ export default function Dashboard({
 
     const kpis = [
       {
-        label:
-          compliancePct === null
-            ? "Compliance —"
-            : `Compliance ${compliancePct}%`,
+        id: "compliance",
+        label: compliancePct === null ? "Compliance —" : `Compliance ${compliancePct}%`,
         tone: complianceTone,
         icon: CheckCircle2,
       },
       {
+        id: "failed",
         label: hasTotal ? `${formatCount(failed)} failed` : "Failed —",
         tone: failedTone,
         icon: AlertTriangle,
       },
       {
+        id: "total",
         label: hasTotal ? `${formatCount(total)} total` : "Total —",
         tone: "neutral",
         icon: Shield,
       },
       {
-        label: `Updated ${lastTime}`,
+        id: "updated",
+        label:
+          hasScan && lastScanLabel ? (
+            <>
+              Updated <RelativeTime value={lastScanLabel} preset="summary" />
+            </>
+          ) : (
+            "Updated —"
+          ),
         tone: "neutral",
         icon: Clock3,
       },
@@ -379,7 +375,15 @@ export default function Dashboard({
         title: "Context",
         items: [
           { label: "Connection", value: hasScan ? connectionLabel : "—" },
-          { label: "Date", value: hasScan ? lastDate : "—" },
+          {
+            label: "Date",
+            value:
+              hasScan && lastScanLabel ? (
+                <RelativeTime value={lastScanLabel} preset="scansTableCell" />
+              ) : (
+                "—"
+              ),
+          },
         ],
       },
     ]
@@ -682,10 +686,7 @@ export default function Dashboard({
               {summary.kpis.map((kpi) => {
                 const Icon = kpi.icon;
                 return (
-                  <span
-                    key={kpi.label}
-                    className={summaryChipClasses(kpi.tone)}
-                  >
+                  <span key={kpi.id} className={summaryChipClasses(kpi.tone)}>
                     <Icon size={14} strokeWidth={2} aria-hidden="true" />
                     {kpi.label}
                   </span>
@@ -865,9 +866,6 @@ export default function Dashboard({
 
                       <tbody>
                         {recentScans.map((s) => {
-                          const dt = formatDateTimePartsAEST(
-                            s.started_at || s.finished_at,
-                          );
                           const passed = Number(s.passed_count || 0);
                           const failed = Number(s.failed_count || 0);
                           const errors = Number(s.error_count || 0);
@@ -893,10 +891,7 @@ export default function Dashboard({
                                     : "border-border-subtle text-[rgb(30_41_59)]"
                                 }`}
                               >
-                                <div className="flex flex-col gap-0.5 leading-[1.2]">
-                                  <div className="font-bold text-[12px]">{dt.date}</div>
-                                  <div className={`text-[12px] ${textTertiary}`}>{dt.time}</div>
-                                </div>
+                                <RelativeTime value={s.started_at || s.finished_at} preset="recentScanCell" />
                               </td>
 
                               <td
