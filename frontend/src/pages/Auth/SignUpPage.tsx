@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import "./LoginPage.css";
-import "./SignUpPage.css";
 import LandingHeader from "../Landing/components/LandingHeader";
 import LandingFooter from "../Landing/components/LandingFooter";
 import SignupBrandPanel from "./components/SignupBrandPanel";
@@ -21,9 +19,12 @@ const emptyForm: SignUpFormData = {
 export type SignUpPageProps = {
   onSignUp: (payload: SignUpSubmitPayload) => Promise<void>;
   onBackToLogin: () => void;
-}
+};
 
-export default function SignUpPage({ onSignUp, onBackToLogin }: SignUpPageProps) {
+export default function SignUpPage({
+  onSignUp,
+  onBackToLogin,
+}: SignUpPageProps) {
   const [formData, setFormData] = useState<SignUpFormData>(emptyForm);
   const [submitError, setSubmitError] = useState("");
 
@@ -32,6 +33,7 @@ export default function SignUpPage({ onSignUp, onBackToLogin }: SignUpPageProps)
       ...prev,
       [field]: value,
     }));
+
     if (submitError) {
       setSubmitError("");
     }
@@ -39,15 +41,20 @@ export default function SignUpPage({ onSignUp, onBackToLogin }: SignUpPageProps)
 
   const getSubmitErrorMessage = (error: unknown): string => {
     const message =
-      error instanceof Error ? error.message : "Sign up failed. Please try again.";
+      error instanceof Error
+        ? error.message
+        : "Sign up failed. Please try again.";
+
     if (message === "REGISTER_USER_ALREADY_EXISTS") {
       return "An account with this email already exists.";
     }
+
     return message;
   };
 
   const handleFormSubmit = async (payload: SignUpSubmitPayload) => {
     setSubmitError("");
+
     try {
       await onSignUp(payload);
       setFormData(emptyForm);
@@ -57,10 +64,12 @@ export default function SignUpPage({ onSignUp, onBackToLogin }: SignUpPageProps)
   };
 
   return (
-    <div className="login-page signup-page">
-      <LandingHeader />
-      <main className="login-main signup-main">
-        <SignupBrandPanel />
+<div className="min-h-screen flex flex-col bg-white text-slate-900">
+        <LandingHeader />
+
+<main className="flex flex-1 flex-col lg:flex-row items-center justify-center gap-8 px-6 py-10 text-slate-900 [&_*]:text-slate-900">
+          <SignupBrandPanel />
+
         <SignupFormPanel
           formData={formData}
           onFormChange={handleFormChange}
@@ -69,6 +78,7 @@ export default function SignUpPage({ onSignUp, onBackToLogin }: SignUpPageProps)
           submitError={submitError}
         />
       </main>
+
       <LandingFooter />
     </div>
   );
