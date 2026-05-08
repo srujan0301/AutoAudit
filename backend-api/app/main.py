@@ -34,18 +34,12 @@ def create_app() -> FastAPI:
     def root():
         return {"status": "ok", "message": "AutoAudit API running"}
 
-    @app.get("/health")
+    @app.get("/liveness")
     def health_check():
         return {
             "status": "healthy",
         }
-
-    @app.get("/version")
-    def version():
-        return {
-            "version": app.version,
-        }
-
+        
     return app
 
 app = create_app()
