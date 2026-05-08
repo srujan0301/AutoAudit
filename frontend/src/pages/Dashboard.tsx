@@ -462,7 +462,6 @@ export default function Dashboard({
 
   const pageBg = isDarkMode ? "text-white" : "bg-[rgb(var(--surface-1))] text-[rgb(30_41_59)]";
 
-
   const panelBase = isDarkMode
     ? "border border-[rgb(var(--brand-blue)/0.16)] bg-[rgb(var(--surface-1)/0.72)]"
     : "border border-[rgb(var(--border-subtle))] bg-white";
@@ -505,18 +504,24 @@ export default function Dashboard({
     navigate("/evidence-scanner");
   };
 
-return (
-  <div
-    className={`${pageBg} min-h-screen px-4 py-4 transition-colors duration-300 md:px-6 md:py-5`}
-    style={{
-  marginLeft: sidebarWidth === 0 ? "80px" : `${sidebarWidth}px`,
-  width: sidebarWidth === 0 ? "calc(100% - 80px)" : `calc(100% - ${sidebarWidth}px)`,
-  transition: "margin-left 0.4s ease, width 0.4s ease",
-  background: isDarkMode
-    ? "radial-gradient(1200px 650px at 280px 0px, rgb(var(--brand-blue)/0.22), transparent 60%), radial-gradient(900px 540px at calc(100% - 260px) 80px, rgb(var(--accent-good)/0.14), transparent 65%), #0a1628"
-    : undefined,
-}}
+  const pageOffsetStyle = {
+    marginLeft: sidebarWidth === 0 ? "80px" : `${sidebarWidth}px`,
+    width:
+      sidebarWidth === 0
+        ? "calc(100% - 80px)"
+        : `calc(100% - ${sidebarWidth}px)`,
+    transition: "margin-left 0.4s ease, width 0.4s ease",
+  };
 
+  return (
+    <div
+      className={`${pageBg} min-h-screen px-4 py-4 transition-colors duration-300 md:px-6 md:py-5`}
+      style={{
+        ...pageOffsetStyle,
+        background: isDarkMode
+          ? "radial-gradient(1200px 650px at 280px 0px, rgb(var(--brand-blue)/0.22), transparent 60%), radial-gradient(900px 540px at calc(100% - 260px) 80px, rgb(var(--accent-good)/0.14), transparent 65%), #0a1628"
+          : undefined,
+      }}
     >
       <div className="mx-auto flex w-full max-w-330 flex-col gap-6">
         <div className="mb-0 flex flex-col gap-4 items-start justify-between md:flex-row md:items-center">
