@@ -35,17 +35,25 @@ export default function SignUpPage({
       ...prev,
       [field]: value,
     }));
+<<<<<<< HEAD
 
     if (submitError) {
       setSubmitError("");
     }
+=======
+    if (submitError) setSubmitError("");
+>>>>>>> upstream/main
   };
 
   const getSubmitErrorMessage = (error: unknown): string => {
     const message =
+<<<<<<< HEAD
       error instanceof Error
         ? error.message
         : "Sign up failed. Please try again.";
+=======
+      error instanceof Error ? error.message : "Sign up failed. Please try again.";
+>>>>>>> upstream/main
 
     if (message === "REGISTER_USER_ALREADY_EXISTS") {
       return "An account with this email already exists.";
@@ -66,6 +74,7 @@ export default function SignUpPage({
   };
 
   return (
+<<<<<<< HEAD
 <div className="min-h-screen flex flex-col bg-white text-slate-900">
         <LandingHeader />
 
@@ -79,6 +88,31 @@ export default function SignUpPage({
           onBackToLogin={onBackToLogin}
           submitError={submitError}
         />
+=======
+    <div className="flex flex-col min-h-screen bg-[rgb(8_27_46)]">
+      <LandingHeader />
+
+      <main className="flex flex-1 justify-center items-center py-12 px-6">
+        <div className="grid gap-10 w-full max-w-6xl lg:grid-cols-2">
+
+          {/* Left side (branding) */}
+          <div className="hidden justify-center items-center lg:flex">
+            <SignupBrandPanel />
+          </div>
+
+          {/* Right side (form) */}
+          <div className="flex justify-center items-center">
+            <SignupFormPanel
+              formData={formData}
+              onFormChange={handleFormChange}
+              onSubmit={handleFormSubmit}
+              onBackToLogin={onBackToLogin}
+              submitError={submitError}
+            />
+          </div>
+
+        </div>
+>>>>>>> upstream/main
       </main>
 
       <LandingFooter />

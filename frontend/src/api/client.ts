@@ -38,69 +38,39 @@ async function fetchWithAuth<T = any>(
   options: RequestInit = {}
 ): Promise<T> {
   const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
     ...((options.headers as Record<string, string> | undefined) || {}),
   };
-
-  if (!(options.body instanceof FormData)) {
-    headers['Content-Type'] = 'application/json';
-  }
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  if (import.meta.env.DEV) {
-    console.log('API:', options.method || 'GET', endpoint);
-  }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
       headers,
-      signal: controller.signal,
     });
 
-    clearTimeout(timeout);
-
     if (!response.ok) {
-      const raw = await response.text().catch(() => '');
-      let errorPayload: Record<string, unknown> = { detail: response.statusText };
-
-      try {
-        errorPayload = raw ? JSON.parse(raw) : { detail: response.statusText };
-      } catch {
-        errorPayload = { detail: raw || response.statusText };
-      }
-
-      throw new APIError(getErrorDetail(errorPayload, 'Request failed'), response.status, errorPayload);
+      const error = (await response.json().catch(() => ({ detail: response.statusText }))) as Record<
+        string,
+        unknown
+      >;
+      throw new APIError(getErrorDetail(error, 'Request failed'), response.status, error);
     }
 
+    // Support endpoints that may return 204 No Content.
     if (response.status === 204) {
       return undefined as T;
     }
 
-    const text = await response.text().catch(() => '');
-
-    try {
-      return (text ? JSON.parse(text) : undefined) as T;
-    } catch {
-      return text as T;
-    }
+    return (await response.json()) as T;
   } catch (error: unknown) {
-    clearTimeout(timeout);
-
     if (error instanceof APIError) {
       throw error;
     }
-
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new APIError('Request timeout', 408);
-    }
-
-    const message = error instanceof Error ? error.message : 'Network error occurred';
+    const message = error instanceof Error ? error.message : 'Network error';
     throw new APIError(message, 0);
   }
 }
@@ -334,6 +304,24 @@ export type CreateScanPayload = {
   version: string;
 }
 
+// One item in the readiness breakdown shown on the scan form.
+export type ScanReadinessCheck = {
+  key: string;
+  label: string;
+  status: 'pass' | 'fail' | 'warn';
+  severity: 'critical' | 'warning';
+  message: string;
+}
+
+export type ScanReadinessResponse = {
+  ready: boolean;
+  summary: string;
+  required_permissions: string[];
+  missing_permissions: string[];
+  unverified_permissions: string[];
+  checks: ScanReadinessCheck[];
+}
+
 export async function getScans(token: AuthToken): Promise<any> {
   return fetchWithAuth('/v1/scans/', token);
 }
@@ -347,6 +335,26 @@ export async function createScan(token: AuthToken, data: CreateScanPayload): Pro
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+export async function getScanReadiness(
+  token: AuthToken,
+  params: {
+    m365_connection_id: number;
+    framework: string;
+    benchmark: string;
+    version: string;
+  }
+): Promise<ScanReadinessResponse> {
+  // Readiness is a lightweight GET request because it only validates the selected connection and benchmark. It does not create or start a scan.
+  const search = new URLSearchParams({
+    m365_connection_id: String(params.m365_connection_id),
+    framework: params.framework,
+    benchmark: params.benchmark,
+    version: params.version,
+  });
+
+  return fetchWithAuth(`/v1/scans/readiness?${search.toString()}`, token);
 }
 
 export async function deleteScan(token: AuthToken, id: string | number): Promise<void> {
