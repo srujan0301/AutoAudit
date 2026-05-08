@@ -1,5 +1,6 @@
 import React from "react";
 import "../Landing/LandingPage.css";
+import "./LoginPage.css";
 import LandingHeader from "../Landing/components/LandingHeader";
 import BrandPanel from "./components/BrandPanel";
 import SignInPanel from "./components/SignInPanel";

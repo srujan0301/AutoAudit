@@ -4,6 +4,8 @@ import LandingFooter from "../Landing/components/LandingFooter";
 import SignupBrandPanel from "./components/SignupBrandPanel";
 import SignupFormPanel from "./components/SignupFormPanel";
 import type { SignUpFormData, SignUpSubmitPayload } from "./signUpTypes";
+import "./LoginPage.css";
+import "./SignUpPage.css";
 
 export type { SignUpFormData, SignUpSubmitPayload } from "./signUpTypes";
 

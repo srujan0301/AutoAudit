@@ -8,6 +8,7 @@ import LoginHeader from "./components/LoginHeader";
 import BrandPanel from "./components/BrandPanel";
 import LandingFooter from "../Landing/components/LandingFooter";
 import { useAuth } from "../../context/AuthContext";
+import "./LoginPage.css";
 
 const CALLBACK_CACHE_KEY = "autoaudit.oauth.google.callback.params";
 
