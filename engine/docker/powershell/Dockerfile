@@ -8,7 +8,8 @@ RUN pwsh -NoProfile -Command " \
 "
 
 # Run as non-root user for security
-RUN useradd --uid 1000 --create-home appuser
+RUN tdnf install -y shadow-utils && \
+    useradd --uid 1000 --create-home appuser
 USER appuser
 
 # Set entrypoint to PowerShell
