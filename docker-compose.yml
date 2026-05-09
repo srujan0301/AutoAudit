@@ -203,6 +203,11 @@ services:
     restart: unless-stopped
 
   powershell-service:
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
     profiles: ["powershell", "all"]
     platform: linux/amd64
     build:
