@@ -275,59 +275,6 @@
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
 }
 
-.hero-visual {
-  display: grid;
-  gap: 1rem;
-}
-
-.floating-card {
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 1.25rem;
-  background: rgb(255 255 255 / 3%);
-  border: 1px solid rgb(59 130 246 / 12%);
-  border-radius: 20px;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.floating-card:hover {
-  border-color: rgb(59 130 246 / 45%);
-  box-shadow: 0 12px 30px rgb(59 130 246 / 18%);
-  transform: translateY(-4px);
-}
-
-.card-icon {
-  display: flex;
-  width: 52px;
-  height: 52px;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  border-radius: 14px;
-}
-
-.floating-card-text {
-  min-width: 0;
-}
-
-.floating-card-text h3 {
-  margin: 0 0 0.35rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.floating-card-text p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
 .landing-features {
   padding: 6rem 5%;
 }
@@ -687,11 +634,6 @@
   .hero-buttons {
     justify-content: center;
   }
-
-  .hero-visual {
-    max-width: 560px;
-    margin: 0 auto;
-  }
 }
 
 @media (max-width: 768px) {
@@ -703,17 +645,6 @@
   .landing-nav {
     flex-wrap: wrap;
     justify-content: center;
-  }
-
-  .floating-card {
-    grid-template-columns: 1fr;
-    text-align: center;
-    justify-items: center;
-  }
-
-  .floating-card-text h3,
-  .floating-card-text p {
-    text-align: center;
   }
 }
 
