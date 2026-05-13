@@ -16,18 +16,26 @@ from collectors.base import BaseDataCollector
 from collectors.graph_client import GraphClient
 
 
+# Microsoft Graph defenderAttackSurfaceReductionType enum values, lowercased.
+# Source: https://learn.microsoft.com/en-us/graph/api/resources/intune-deviceconfig-defenderattacksurfacereductiontype
+# Anything not in the map returns "unknown", which the severity comparison
+# below treats as weakest — so a future Intune enum addition fails closed in
+# the Rego policy rather than being silently misclassified.
+INTUNE_ASR_STATE_MAP = {
+    "block": "block",
+    "audit": "audit",
+    "auditmode": "audit",  # Graph literal is "auditMode"
+    "warn": "warn",
+    "disable": "disabled",
+    "userdefined": "disabled",
+    "notconfigured": "not_configured",
+    "off": "disabled",
+}
+
+
 def _normalize_state(raw: str) -> str:
-    """Map an Intune ASR enum value to block/audit/warn/disabled."""
-    raw = (raw or "").lower()
-    if "block" in raw:
-        return "block"
-    if "audit" in raw:
-        return "audit"
-    if "warn" in raw:
-        return "warn"
-    if "disable" in raw or "userdefined" in raw or "off" in raw:
-        return "disabled"
-    return raw or "not_configured"
+    """Map an Intune ASR enum value to block / audit / warn / disabled / not_configured."""
+    return INTUNE_ASR_STATE_MAP.get((raw or "").lower(), "unknown")
 
 
 class ASRRulesDataCollector(BaseDataCollector):
@@ -50,7 +58,8 @@ class ASRRulesDataCollector(BaseDataCollector):
             if not config_id:
                 continue
             full_config = await client.get(
-                f"/deviceManagement/deviceConfigurations/{config_id}", beta=True,
+                f"/deviceManagement/deviceConfigurations/{config_id}",
+                beta=True,
             )
             win32_value = full_config.get("defenderOfficeMacroCodeAllowWin32ImportsType")
             if win32_value:
@@ -69,7 +78,14 @@ class ASRRulesDataCollector(BaseDataCollector):
         # ASD ML2 requires Block on every profile. If any profile is weaker, the
         # tenant is non-compliant — surface the weakest state and the profile it
         # came from. Order: disabled < audit < warn < block.
-        severity = {"disabled": 0, "audit": 1, "warn": 2, "block": 3}
+        severity = {
+            "unknown": -1,
+            "not_configured": 0,
+            "disabled": 1,
+            "audit": 2,
+            "warn": 3,
+            "block": 4,
+        }
         weakest_state, weakest_name = min(
             findings, key=lambda f: severity.get(f[0], -1)
         )
