@@ -132,3 +132,23 @@ class ScanSummary(BaseModel):
     categories: list[ControlCategoryBreakdown]
 
     model_config = ConfigDict(from_attributes=True)
+
+class ScanReadinessCheck(BaseModel):
+    """Individual readiness check result."""
+
+    key: str
+    label: str
+    status: str  # pass, fail, warn
+    severity: str  # critical, warning
+    message: str
+
+
+class ScanReadinessResponse(BaseModel):
+    """Pre-scan readiness result."""
+
+    ready: bool
+    summary: str
+    required_permissions: list[str]
+    missing_permissions: list[str]
+    unverified_permissions: list[str]
+    checks: list[ScanReadinessCheck]
