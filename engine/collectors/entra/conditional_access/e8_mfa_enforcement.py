@@ -116,6 +116,7 @@ class E8MfaEnforcementDataCollector(BaseDataCollector):
 
             include_users = users.get("includeUsers") or []
             include_roles = users.get("includeRoles") or []
+            include_groups = users.get("includeGroups") or []
 
             # Targets all users (implicitly includes privileged users)
             if CA_ALL_SENTINEL in include_users:
@@ -123,6 +124,12 @@ class E8MfaEnforcementDataCollector(BaseDataCollector):
 
             # Targets specific privileged roles
             elif include_roles:
+                mfa_for_privileged_roles.append(self._summarise_policy(policy))
+
+            # Targets specific groups (e.g. "All Admins" security group)
+            # We cannot resolve group members in the collector, so these are
+            # surfaced in the policy summary for assessor review.
+            elif include_groups:
                 mfa_for_privileged_roles.append(self._summarise_policy(policy))
 
         # --- Identify policies that cover M365 services ---
@@ -185,8 +192,10 @@ class E8MfaEnforcementDataCollector(BaseDataCollector):
 
         include_users = users.get("includeUsers") or []
         include_roles = users.get("includeRoles") or []
+        include_groups = users.get("includeGroups") or []
         exclude_users = users.get("excludeUsers") or []
         exclude_groups = users.get("excludeGroups") or []
+        exclude_roles = users.get("excludeRoles") or []
         include_apps = apps.get("includeApplications") or []
 
         return {
@@ -198,9 +207,13 @@ class E8MfaEnforcementDataCollector(BaseDataCollector):
             "targets_all_users": CA_ALL_SENTINEL in include_users,
             "include_roles": include_roles,
             "include_roles_count": len(include_roles),
+            "include_groups": include_groups,
+            "include_groups_count": len(include_groups),
+            "targets_groups": bool(include_groups),
             "exclude_users": exclude_users,
             "exclude_groups": exclude_groups,
-            "has_exclusions": bool(exclude_users or exclude_groups),
+            "exclude_roles": exclude_roles,
+            "has_exclusions": bool(exclude_users or exclude_groups or exclude_roles),
 
             # App scope — "All" means all cloud apps (covers M365)
             "targets_all_apps": CA_ALL_SENTINEL in include_apps,

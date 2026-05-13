@@ -1,4 +1,4 @@
-package essential_eight.e8.v1_0_0.control_E8_MFA_01_test
+package essential_eight.asd_essential_eight.v2025.test_e8_mfa_2_1
 
 import rego.v1
 
@@ -68,7 +68,7 @@ _mfa_all_users_specific_apps_only := {
 # ---------------------------------------------------------------------------
 
 test_compliant_mfa_all_users_all_apps if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 3,
         "enabled_policies_count": 2,
         "mfa_policies_count": 1,
@@ -88,7 +88,7 @@ test_compliant_mfa_all_users_all_apps if {
 # ---------------------------------------------------------------------------
 
 test_compliant_mfa_privileged_roles_all_apps if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 2,
         "enabled_policies_count": 1,
         "mfa_policies_count": 1,
@@ -106,7 +106,7 @@ test_compliant_mfa_privileged_roles_all_apps if {
 # ---------------------------------------------------------------------------
 
 test_compliant_with_exclusions_flagged if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 3,
         "enabled_policies_count": 2,
         "mfa_policies_count": 1,
@@ -127,7 +127,7 @@ test_compliant_with_exclusions_flagged if {
 # ---------------------------------------------------------------------------
 
 test_non_compliant_mfa_specific_apps_only if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 2,
         "enabled_policies_count": 1,
         "mfa_policies_count": 1,
@@ -146,7 +146,7 @@ test_non_compliant_mfa_specific_apps_only if {
 # ---------------------------------------------------------------------------
 
 test_non_compliant_no_mfa_policies if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 5,
         "enabled_policies_count": 5,
         "mfa_policies_count": 0,
@@ -164,7 +164,7 @@ test_non_compliant_no_mfa_policies if {
 # ---------------------------------------------------------------------------
 
 test_non_compliant_no_policies if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 0,
         "enabled_policies_count": 0,
         "mfa_policies_count": 0,
@@ -181,7 +181,7 @@ test_non_compliant_no_policies if {
 # ---------------------------------------------------------------------------
 
 test_result_details_structure if {
-    result := data.essential_eight.e8.v1_0_0.control_E8_MFA_01.result with input as {
+    result := data.essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1.result with input as {
         "total_policies": 3,
         "enabled_policies_count": 2,
         "mfa_policies_count": 1,

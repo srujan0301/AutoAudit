@@ -1,0 +1,29 @@
+{
+  "framework": "essential-eight",
+  "benchmark": "Essential Eight Maturity Model",
+  "slug": "asd-essential-eight",
+  "version": "v2025",
+  "release_date": "2025-04-24",
+  "platform": "m365",
+  "source_url": "https://www.cyber.gov.au/resources-business-and-government/essential-cyber-security/essential-eight",
+  "controls": [
+    {
+      "control_id": "E8-MFA-2.1",
+      "title": "MFA required for privileged users and Microsoft 365 services",
+      "description": "Checks whether Conditional Access policies exist that require MFA for privileged users and for access to Microsoft 365 services.",
+      "severity": "critical",
+      "service": "EntraID",
+      "level": "ML1",
+      "is_manual": false,
+      "benchmark_audit_type": "Automated",
+      "automation_status": "ready",
+      "data_collector_id": "entra.conditional_access.e8_mfa_enforcement",
+      "policy_file": "e8_mfa_2_1_ca_enforcement.rego",
+      "requires_permissions": [
+        "Policy.Read.All",
+        "RoleManagement.Read.Directory"
+      ],
+      "notes": "Research basis: 26T1-SEC-EG-001 and 26T1-SEC-EG-003."
+    }
+  ]
+}

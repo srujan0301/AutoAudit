@@ -24,17 +24,17 @@
 # - ref: https://learn.microsoft.com/en-us/graph/api/resources/conditionalaccesspolicy
 #   description: Conditional Access policies - Microsoft Graph API
 # custom:
-#   control_id: E8-MFA-01
-#   framework: essential_eight
-#   benchmark: essential-eight
-#   version: v1.0.0
+#   control_id: E8-MFA-2.1
+#   framework: essential-eight
+#   benchmark: asd-essential-eight
+#   version: v2025
 #   severity: critical
 #   service: EntraID
 #   requires_permissions:
 #   - Policy.Read.All
 #   - RoleManagement.Read.Directory
 
-package essential_eight.e8.v1_0_0.control_E8_MFA_01
+package essential_eight.asd_essential_eight.v2025.control_e8_mfa_2_1
 
 import rego.v1
 
