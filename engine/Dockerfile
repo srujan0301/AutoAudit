@@ -25,9 +25,9 @@ COPY --chown=appuser:appuser opa_client.py ./
 # Set Python path to include /app
 ENV PYTHONPATH=/app
 
-# Copy and make entrypoint executable
+# Copy entrypoint script and fix line endings
 COPY --chown=appuser:appuser worker_entrypoint.sh .
-RUN chmod +x worker_entrypoint.sh
+RUN sed -i 's/\r$//' worker_entrypoint.sh && chmod +x worker_entrypoint.sh
 
 USER appuser
 
