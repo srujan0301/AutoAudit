@@ -16,17 +16,19 @@ RUN apt-get update && \
       libtesseract-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Create non-root user early, before any COPYs
+RUN adduser --disabled-password --gecos "" --uid 1000 appuser
+RUN chown appuser:appuser /app
+
 # Python dependencies
-COPY requirements.txt .
+COPY --chown=appuser:appuser requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Application code
-COPY . .
+COPY --chown=appuser:appuser . .
 
 EXPOSE 8000
 
-# Run as non-root user for security
-RUN adduser --disabled-password --gecos "" --uid 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 CMD ["uvicorn", "evidence_ui.app:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -10,23 +10,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libtesseract-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user early, before any COPYs
+RUN adduser --disabled-password --gecos "" --uid 1000 appuser
+RUN chown appuser:appuser /app
+
 # Install uv
 RUN pip install uv
 
-# Copy dependency files
-COPY backend-api/pyproject.toml backend-api/uv.lock ./
-
-# Install dependencies (include evidence extra so OCR/reporting stack is present)
-RUN uv sync --frozen --no-dev --extra evidence
+# Copy dependency files and install dependencies
+COPY --chown=appuser:appuser backend-api/pyproject.toml backend-api/uv.lock ./
+RUN uv sync --frozen --no-dev --extra evidence \
+    && chown -R appuser:appuser /app/.venv
 
 # Copy application code
-COPY backend-api/app ./app
-COPY backend-api/alembic ./alembic
-COPY backend-api/alembic.ini ./
-COPY backend-api/entrypoint.sh ./
+COPY --chown=appuser:appuser backend-api/app ./app
+COPY --chown=appuser:appuser backend-api/alembic ./alembic
+COPY --chown=appuser:appuser backend-api/alembic.ini backend-api/entrypoint.sh ./
 
 # Copy evidence scanner assets/logic
-COPY security ./security
+COPY --chown=appuser:appuser security ./security
 
 # Make entrypoint executable
 RUN chmod +x entrypoint.sh
@@ -34,8 +36,6 @@ RUN chmod +x entrypoint.sh
 # Expose port
 EXPOSE 8000
 
-# Run as non-root user for security
-RUN adduser --disabled-password --gecos "" --uid 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 # Run migrations and start the application
