@@ -25,9 +25,8 @@ const ContactHero: React.FC = () => (
     id="home"
     className="relative overflow-hidden bg-linear-to-br from-surface-1 via-accent-navy/88 to-accent-navy/70 px-[5%] pb-16 pt-40 text-center"
   >
-    <div className="pointer-events-none absolute -right-50 -top-50 h-150 w-150 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-blue)/0.1)_0%,transparent_70%)] opacity-90" />
-    <div className="pointer-events-none absolute -bottom-25 -left-25 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-blue)/0.1)_0%,transparent_70%)] opacity-90" />
-
+    <div className="pointer-events-none absolute -right-50 -top-50 h-150 w-150 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-blue)/0.1)_0%,transparent_70%)] opacity-90"></div>
+    <div className="pointer-events-none absolute -bottom-25 -left-25 h-100 w-100 rounded-full bg-[radial-gradient(circle,rgb(var(--brand-blue)/0.1)_0%,transparent_70%)] opacity-90"></div>
     <div className="relative z-1 mx-auto max-w-200">
       <p className="mb-3 text-sm font-semibold tracking-wide text-text-strong">
         Contact AutoAudit
