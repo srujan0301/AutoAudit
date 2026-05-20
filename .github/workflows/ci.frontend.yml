@@ -51,7 +51,7 @@ jobs:
           category: "/language:${{matrix.language}}"
 
   run-lint:
-    name: Linting Code
+    name: Linting frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -59,23 +59,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Lint Code Base
-        uses: github/super-linter@v4
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          DEFAULT_BRANCH: "main"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_YAML: false
-          VALIDATE_GITHUB_ACTIONS: false
-          VALIDATE_PYTHON_BLACK: false
-          VALIDATE_PYTHON_FLAKE8: false
-          VALIDATE_PYTHON_ISORT: false
-          VALIDATE_JAVASCRIPT_STANDARD: false
-          VALIDATE_HTML: false
-          VALIDATE_MARKDOWN: false
-          VALIDATE_NATURAL_LANGUAGE: false
-          VALIDATE_CSS: false
-          VALIDATE_CSS_PRETTIER: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run oxlint
+        run: npm run lint
+        working-directory: frontend
 
   report:
     name: Report PR status
