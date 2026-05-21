@@ -32,7 +32,7 @@ dependencies = [
 # aren't forced to install it unless they touch evidence scanning.
 evidence = [
     "pytesseract>=0.3.10",
-    "pillow>=10.4.0",
+    "pillow>=12.2.0",
     "opencv-python>=4.10.0.84",
     "python-docx>=1.1.2",
     "docx2pdf>=0.1.8",
