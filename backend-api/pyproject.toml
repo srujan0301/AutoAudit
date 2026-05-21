@@ -20,7 +20,7 @@ dependencies = [
     # Microsoft Graph (client credentials via MSAL)
     "msal>=1.31.0",
     # Multipart upload support for evidence/file endpoints
-    "python-multipart>=0.0.12",
+    "python-multipart>=0.0.29",
     # Encryption for credentials at rest
     "cryptography>=42.0.0",
     # Celery client for queueing tasks
