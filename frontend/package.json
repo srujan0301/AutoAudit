@@ -22,7 +22,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix"
   },
   "browserslist": {
     "production": [
@@ -42,6 +44,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "oxlint": "^1.66.0",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3",
