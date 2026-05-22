@@ -98,11 +98,13 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Run unit tests
+        if: always()
         run: npm test -- --reporter=verbose
         env:
           VITE_API_URL: http://localhost:8000
 
       - name: Build
+        if: always()
         run: npm run build
 
   report:
