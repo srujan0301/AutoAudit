@@ -74,9 +74,42 @@ jobs:
         run: npm run lint
         working-directory: frontend
 
+  build-and-test:
+    name: Build and Test Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Run unit tests
+        if: always()
+        run: npm test -- --reporter=verbose
+        env:
+          VITE_API_URL: http://localhost:8000
+
+      - name: Build
+        if: always()
+        run: npm run build
+
   report:
     name: Report PR status
-    needs: [analyze, run-lint]
+    needs: [analyze, run-lint, build-and-test]
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -85,11 +118,12 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            const analyze = '${{ needs.analyze.result }}';
-            const lint    = '${{ needs.run-lint.result }}';
+            const analyze   = '${{ needs.analyze.result }}';
+            const lint      = '${{ needs.run-lint.result }}';
+            const buildTest = '${{ needs.build-and-test.result }}';
 
             const icon = r => ({ success: '✅', failure: '❌', cancelled: '🚫', skipped: '⏭️' }[r] ?? '❓');
-            const allPassed = [analyze, lint].every(r => ['success', 'skipped'].includes(r));
+            const allPassed = [analyze, lint, buildTest].every(r => ['success', 'skipped'].includes(r));
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const marker = '<!-- ci-report-frontend -->'; // used to find and update the existing comment
 
@@ -101,6 +135,7 @@ jobs:
               `|---|---|`,
               `| Security analysis (CodeQL) | ${icon(analyze)} \`${analyze}\` |`,
               `| Lint | ${icon(lint)} \`${lint}\` |`,
+              `| Build and test | ${icon(buildTest)} \`${buildTest}\` |`,
               ``,
               allPassed
                 ? `All checks passed.`
