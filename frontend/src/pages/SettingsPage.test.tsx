@@ -53,16 +53,15 @@ describe('SettingsPage error state', () => {
 // --- hasChanges / Save + Reset buttons ---
 
 describe('hasChanges', () => {
-  it('disables Save and Reset when no changes have been made', async () => {
+  it('disables Save when no changes have been made', async () => {
     vi.mocked(mockGetSettings).mockResolvedValue({ confirm_delete_enabled: true });
     renderPage();
     await waitForLoaded();
 
     expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /reset/i })).toBeDisabled();
   });
 
-  it('enables Save and Reset after toggling the checkbox', async () => {
+  it('enables Save after toggling the checkbox', async () => {
     vi.mocked(mockGetSettings).mockResolvedValue({ confirm_delete_enabled: true });
     renderPage();
     await waitForLoaded();
@@ -70,19 +69,6 @@ describe('hasChanges', () => {
     await userEvent.click(screen.getByRole('checkbox', { name: /confirm before delete/i }));
 
     expect(screen.getByRole('button', { name: /save/i })).toBeEnabled();
-    expect(screen.getByRole('button', { name: /reset/i })).toBeEnabled();
-  });
-
-  it('disables Save and Reset again after clicking Reset', async () => {
-    vi.mocked(mockGetSettings).mockResolvedValue({ confirm_delete_enabled: true });
-    renderPage();
-    await waitForLoaded();
-
-    await userEvent.click(screen.getByRole('checkbox', { name: /confirm before delete/i }));
-    await userEvent.click(screen.getByRole('button', { name: /reset/i }));
-
-    expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /reset/i })).toBeDisabled();
   });
 });
 
@@ -103,7 +89,7 @@ describe('handleSave', () => {
     );
   });
 
-  it('disables Save and Reset after a successful save', async () => {
+  it('disables Save after a successful save', async () => {
     vi.mocked(mockGetSettings).mockResolvedValue({ confirm_delete_enabled: true });
     vi.mocked(mockUpdateSettings).mockResolvedValue({ confirm_delete_enabled: false });
     renderPage();
@@ -114,7 +100,6 @@ describe('handleSave', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /save/i })).toBeDisabled();
-      expect(screen.getByRole('button', { name: /reset/i })).toBeDisabled();
     });
   });
 

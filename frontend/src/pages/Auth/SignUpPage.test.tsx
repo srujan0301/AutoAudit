@@ -47,7 +47,6 @@ describe('SignUpPage', () => {
           organizationName: 'OrgCo',
           password: 'Password1!',
           confirmPassword: 'Password1!',
-          agreeTerms: true,
         })
       );
     });

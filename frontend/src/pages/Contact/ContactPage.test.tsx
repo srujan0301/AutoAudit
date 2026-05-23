@@ -93,7 +93,7 @@ describe('handleFormSuccess', () => {
     await fillAndSubmit();
 
     await waitFor(() => {
-      expect(document.querySelector('.success-message')).toHaveClass('show');
+      expect(screen.getByText(/thank you/i)).toBeInTheDocument();
     });
   });
 
@@ -107,19 +107,19 @@ describe('handleFormSuccess', () => {
     await fillAndSubmit();
 
     await waitFor(() => {
-      expect(document.querySelector('.success-message')).toHaveClass('show');
+      expect(screen.getByText(/thank you/i)).toBeInTheDocument();
     });
 
     // Find the 5-second callback registered by handleFormSuccess
     const fiveSecondCall = setTimeoutSpy.mock.calls.find(([, delay]) => delay === 5000);
     expect(fiveSecondCall).toBeDefined();
 
-    // Fire the callback as React would 
+    // Fire the callback as React would
     act(() => {
       (fiveSecondCall![0] as () => void)();
     });
 
-    expect(document.querySelector('.success-message')).not.toHaveClass('show');
+    expect(screen.queryByText(/thank you/i)).not.toBeInTheDocument();
 
     setTimeoutSpy.mockRestore();
   });

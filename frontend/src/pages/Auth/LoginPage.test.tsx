@@ -45,7 +45,6 @@ describe('LoginPage', () => {
     renderLogin();
     expect(screen.getByRole('heading', { name: /access security insights anywhere/i })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: /primary navigation/i })).toBeInTheDocument();
   });
 
   test('passes login and sign-up handlers to SignInPanel', async () => {

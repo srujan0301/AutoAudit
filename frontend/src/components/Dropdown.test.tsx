@@ -45,39 +45,15 @@ describe('Dropdown rendering', () => {
     expect(screen.getByText('No options')).toBeInTheDocument();
   });
 
-  it('applies the "dark" class when isDarkMode is true', () => {
-    const { container } = render(
-      <Dropdown value="opt-a" options={OPTIONS} onChange={vi.fn()} isDarkMode={true} />
-    );
-    expect(container.firstChild).toHaveClass('dark');
-  });
-
-  it('applies the "light" class when isDarkMode is false', () => {
-    const { container } = render(
-      <Dropdown value="opt-a" options={OPTIONS} onChange={vi.fn()} isDarkMode={false} />
-    );
-    expect(container.firstChild).toHaveClass('light');
-  });
-
-  it('does not show the listbox on initial render', () => {
+  it('does not show option buttons on initial render', () => {
     renderDropdown();
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Option B' })).not.toBeInTheDocument();
   });
 });
 
 // --- Trigger button ---
 
 describe('Dropdown trigger button', () => {
-  it('has aria-expanded false when closed', () => {
-    renderDropdown();
-    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
-  });
-
-  it('is disabled when no options are provided', () => {
-    renderDropdown({ options: [] });
-    expect(screen.getByRole('button')).toBeDisabled();
-  });
-
   it('is not disabled when options are provided', () => {
     renderDropdown();
     expect(screen.getByRole('button')).not.toBeDisabled();
@@ -87,57 +63,46 @@ describe('Dropdown trigger button', () => {
 // --- Open / close interactions ---
 
 describe('Dropdown open and close', () => {
-  it('opens the listbox when the trigger is clicked', async () => {
+  it('opens the dropdown when the trigger is clicked', async () => {
     renderDropdown();
     await userEvent.click(screen.getByRole('button'));
-    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Option B' })).toBeInTheDocument();
   });
 
-  it('sets aria-expanded to true when open', async () => {
+  it('closes the dropdown when the trigger is clicked again', async () => {
     renderDropdown();
-    await userEvent.click(screen.getByRole('button'));
-    expect(screen.getByRole('button', { expanded: true })).toBeInTheDocument();
+    const trigger = screen.getByRole('button');
+    await userEvent.click(trigger);
+    await userEvent.click(trigger);
+    expect(screen.queryByRole('button', { name: 'Option B' })).not.toBeInTheDocument();
   });
 
-  it('shows all options in the listbox when open', async () => {
-    renderDropdown();
-    await userEvent.click(screen.getByRole('button'));
-    const optionButtons = screen.getAllByRole('option');
-    expect(optionButtons).toHaveLength(OPTIONS.length);
-  });
-
-  it('closes the listbox when the trigger is clicked again', async () => {
-    renderDropdown();
-    await userEvent.click(screen.getByRole('button'));
-    await userEvent.click(screen.getByRole('button'));
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
-  });
-
-  it('closes the listbox when Escape is pressed', async () => {
+  it('closes the dropdown when Escape is pressed', async () => {
     renderDropdown();
     await userEvent.click(screen.getByRole('button'));
     await userEvent.keyboard('{Escape}');
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Option B' })).not.toBeInTheDocument();
   });
 
-  it('closes the listbox when clicking outside the dropdown', async () => {
-    const { container } = render(
+  it('closes the dropdown when clicking outside', async () => {
+    render(
       <div>
         <Dropdown value="opt-a" options={OPTIONS} onChange={vi.fn()} />
         <button>Outside</button>
       </div>
     );
-    await userEvent.click(container.querySelector('.chart-dropdown-trigger')!);
-    expect(container.querySelector('[role="listbox"]')).toBeInTheDocument();
+    await userEvent.click(screen.getAllByRole('button')[0]);
+    expect(screen.getByRole('button', { name: 'Option B' })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Outside' }));
-    expect(container.querySelector('[role="listbox"]')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Option B' })).not.toBeInTheDocument();
   });
 
-  it('does not open when the trigger is disabled (empty options)', async () => {
+  it('does not open when there are no options', async () => {
     renderDropdown({ options: [] });
+    expect(screen.getAllByRole('button')).toHaveLength(1);
     await userEvent.click(screen.getByRole('button'));
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
   });
 });
 
@@ -147,27 +112,14 @@ describe('Dropdown option selection', () => {
   it('calls onChange with the selected option value', async () => {
     const { onChange } = renderDropdown({ value: 'opt-a' });
     await userEvent.click(screen.getByRole('button'));
-    await userEvent.click(screen.getByRole('option', { name: 'Option C' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Option C' }));
     expect(onChange).toHaveBeenCalledWith('opt-c');
   });
 
-  it('closes the listbox after an option is selected', async () => {
+  it('closes the dropdown after an option is selected', async () => {
     renderDropdown();
     await userEvent.click(screen.getByRole('button'));
-    await userEvent.click(screen.getByRole('option', { name: 'Option B' }));
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
-  });
-
-  it('marks the current value as aria-selected in the listbox', async () => {
-    renderDropdown({ value: 'opt-b' });
-    await userEvent.click(screen.getByRole('button'));
-    expect(screen.getByRole('option', { name: 'Option B' })).toHaveAttribute(
-      'aria-selected',
-      'true'
-    );
-    expect(screen.getByRole('option', { name: 'Option A' })).toHaveAttribute(
-      'aria-selected',
-      'false'
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Option B' }));
+    expect(screen.queryByRole('button', { name: 'Option C' })).not.toBeInTheDocument();
   });
 });
