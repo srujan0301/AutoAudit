@@ -220,24 +220,6 @@
         "RoleManagement.Read.Directory"
       ],
       "notes": "Research basis: 26T1-SEC-EG-001 and 26T1-SEC-EG-003."
-    },
-    {
-      "control_id": "E8-PRIV-1.1",
-      "title": "Privileged access restricted and appropriately assigned",
-      "description": "Checks whether administrative privileges are limited to an appropriate set of users by evaluating Entra ID directory role assignments.",
-      "severity": "critical",
-      "service": "EntraID",
-      "maturity_level": "ML1",
-      "is_manual": false,
-      "benchmark_audit_type": "Automated",
-      "automation_status": "ready",
-      "data_collector_id": "entra.roles.cloud_only_admins",
-      "policy_file": "e8_priv_1_1_restrict_admin_privileges.rego",
-      "requires_permissions": [
-        "RoleManagement.Read.Directory",
-        "User.Read.All"
-      ],
-      "notes": "Research basis: 26T1-SEC-EG-002 and 26T1-SEC-EG-004."
     }
   ]
 }
